@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_1e46e6b795f6edcdcf0d71d9447efeca {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+</head>
+<body>
+    
+    
+        <h3 align="center" style="font-size:16px"><b>Cbd Belapur AQI Heat Map</b></h3>
+        
+    
+            <div class="folium-map" id="map_1e46e6b795f6edcdcf0d71d9447efeca" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_1e46e6b795f6edcdcf0d71d9447efeca = L.map(
+                "map_1e46e6b795f6edcdcf0d71d9447efeca",
+                {
+                    center: [19.0158, 73.0295],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_90aa1708b6cbca04ee56c0b18cc926c3 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_90aa1708b6cbca04ee56c0b18cc926c3.addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+            var tile_layer_50aa120ac126ce5494d242e21e3c94fd = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_50aa120ac126ce5494d242e21e3c94fd.addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+            var tile_layer_f5091cc512414a6bc84b5d4a90a5e28d = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_f5091cc512414a6bc84b5d4a90a5e28d.addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+            var heat_map_b2eda247c72c8dc5bbe1a55febc5dca5 = L.heatLayer(
+                [[19.0158, 73.0295, 107], [19.0165, 73.0288, 112], [19.0148, 73.0302, 93], [19.0172, 73.0279, 122], [19.0135, 73.0311, 94], [19.0189, 73.0267, 92], [19.0123, 73.0328, 101], [19.0198, 73.0254, 103]],
+                {
+  "minOpacity": 0.4,
+  "maxZoom": 18,
+  "radius": 25,
+  "blur": 15,
+  "gradient": {
+  0.0: "green",
+  0.3: "yellow",
+  0.6: "orange",
+  0.8: "red",
+  1.0: "darkred",
+},
+}
+            );
+        
+    
+            heat_map_b2eda247c72c8dc5bbe1a55febc5dca5.addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+            var circle_marker_56bb2eaf0c87a4cb35f49381eac2ce6e = L.circleMarker(
+                [19.0158, 73.0295],
+                {"bubblingMouseEvents": true, "color": "#ff7e00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff7e00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_595505590a1775a114f7ab7072167cf2 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_c024f75121db2f5c09e16f4da3a4ee43 = $(`<div id="html_c024f75121db2f5c09e16f4da3a4ee43" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ff7e00;">CBD Belapur Central</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 107</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Unhealthy for Sensitive</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0158<br>                     Lon: 73.0295                 </p>             </div>             </div>`)[0];
+                popup_595505590a1775a114f7ab7072167cf2.setContent(html_c024f75121db2f5c09e16f4da3a4ee43);
+            
+        
+
+        circle_marker_56bb2eaf0c87a4cb35f49381eac2ce6e.bindPopup(popup_595505590a1775a114f7ab7072167cf2)
+        ;
+
+        
+    
+    
+            var circle_marker_8dd0343e23d441a82a0094a89cfd18ae = L.circleMarker(
+                [19.0165, 73.0288],
+                {"bubblingMouseEvents": true, "color": "#ff7e00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff7e00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_9eb71ad647c9b0662e0866a46700b3bd = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_85d5900eebcd2b5b6edcad8eaeeffb7e = $(`<div id="html_85d5900eebcd2b5b6edcad8eaeeffb7e" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ff7e00;">Belapur Railway Station</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 112</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Unhealthy for Sensitive</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0165<br>                     Lon: 73.0288                 </p>             </div>             </div>`)[0];
+                popup_9eb71ad647c9b0662e0866a46700b3bd.setContent(html_85d5900eebcd2b5b6edcad8eaeeffb7e);
+            
+        
+
+        circle_marker_8dd0343e23d441a82a0094a89cfd18ae.bindPopup(popup_9eb71ad647c9b0662e0866a46700b3bd)
+        ;
+
+        
+    
+    
+            var circle_marker_d9624485393d7fb8760315c2644557bd = L.circleMarker(
+                [19.0148, 73.0302],
+                {"bubblingMouseEvents": true, "color": "#ffff00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_309e511d6f069b0a4a619801a7fe69c0 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_94c4aed4f9c1ce58cb5108aa7a8cb529 = $(`<div id="html_94c4aed4f9c1ce58cb5108aa7a8cb529" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ffff00;">CBD Belapur Market</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 93</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Moderate</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0148<br>                     Lon: 73.0302                 </p>             </div>             </div>`)[0];
+                popup_309e511d6f069b0a4a619801a7fe69c0.setContent(html_94c4aed4f9c1ce58cb5108aa7a8cb529);
+            
+        
+
+        circle_marker_d9624485393d7fb8760315c2644557bd.bindPopup(popup_309e511d6f069b0a4a619801a7fe69c0)
+        ;
+
+        
+    
+    
+            var circle_marker_8c6e8a283618f1f81b34b9cf09e5daed = L.circleMarker(
+                [19.0172, 73.0279],
+                {"bubblingMouseEvents": true, "color": "#ff7e00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff7e00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_55fe20e2e189364f26c0a92089eb92c2 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_abc174eabd185f456390e7341022bdb9 = $(`<div id="html_abc174eabd185f456390e7341022bdb9" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ff7e00;">NMMT Bus Stand</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 122</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Unhealthy for Sensitive</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0172<br>                     Lon: 73.0279                 </p>             </div>             </div>`)[0];
+                popup_55fe20e2e189364f26c0a92089eb92c2.setContent(html_abc174eabd185f456390e7341022bdb9);
+            
+        
+
+        circle_marker_8c6e8a283618f1f81b34b9cf09e5daed.bindPopup(popup_55fe20e2e189364f26c0a92089eb92c2)
+        ;
+
+        
+    
+    
+            var circle_marker_0a2cde854a34e66147fc8ec386943efd = L.circleMarker(
+                [19.0135, 73.0311],
+                {"bubblingMouseEvents": true, "color": "#ffff00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_e271e6756fd6300b278d24ade6634721 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_76ef040a122eb6dfb0984402d15cfacb = $(`<div id="html_76ef040a122eb6dfb0984402d15cfacb" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ffff00;">Belapur Creek</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 94</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Moderate</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0135<br>                     Lon: 73.0311                 </p>             </div>             </div>`)[0];
+                popup_e271e6756fd6300b278d24ade6634721.setContent(html_76ef040a122eb6dfb0984402d15cfacb);
+            
+        
+
+        circle_marker_0a2cde854a34e66147fc8ec386943efd.bindPopup(popup_e271e6756fd6300b278d24ade6634721)
+        ;
+
+        
+    
+    
+            var circle_marker_1cb873a0ae81a8b6adefd1b8bbfc8ce7 = L.circleMarker(
+                [19.0189, 73.0267],
+                {"bubblingMouseEvents": true, "color": "#ffff00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_44edd6bec03f022ed73ecdcca5f60643 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_ef2106db53046fe0b0b52a22ee2a6da4 = $(`<div id="html_ef2106db53046fe0b0b52a22ee2a6da4" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ffff00;">Sector 15</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 92</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Moderate</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0189<br>                     Lon: 73.0267                 </p>             </div>             </div>`)[0];
+                popup_44edd6bec03f022ed73ecdcca5f60643.setContent(html_ef2106db53046fe0b0b52a22ee2a6da4);
+            
+        
+
+        circle_marker_1cb873a0ae81a8b6adefd1b8bbfc8ce7.bindPopup(popup_44edd6bec03f022ed73ecdcca5f60643)
+        ;
+
+        
+    
+    
+            var circle_marker_96ef5fce4534257ddef7d81ef1498ee4 = L.circleMarker(
+                [19.0123, 73.0328],
+                {"bubblingMouseEvents": true, "color": "#ff7e00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff7e00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_49c7bacb14c1ae0c3f98d51ca7a30cef = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_481ba4f8f69fc92b4231782a72909d78 = $(`<div id="html_481ba4f8f69fc92b4231782a72909d78" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ff7e00;">Sector 11</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 101</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Unhealthy for Sensitive</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0123<br>                     Lon: 73.0328                 </p>             </div>             </div>`)[0];
+                popup_49c7bacb14c1ae0c3f98d51ca7a30cef.setContent(html_481ba4f8f69fc92b4231782a72909d78);
+            
+        
+
+        circle_marker_96ef5fce4534257ddef7d81ef1498ee4.bindPopup(popup_49c7bacb14c1ae0c3f98d51ca7a30cef)
+        ;
+
+        
+    
+    
+            var circle_marker_0298cd3de9ddd093659d50c3daf67893 = L.circleMarker(
+                [19.0198, 73.0254],
+                {"bubblingMouseEvents": true, "color": "#ff7e00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff7e00", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+        
+    
+        var popup_e532fdeb13ba6b040744e2445e002530 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_0e0a6a19aa20c9b01212c63529afd31b = $(`<div id="html_0e0a6a19aa20c9b01212c63529afd31b" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial, sans-serif;">                 <h4 style="margin: 0; color: #ff7e00;">Palm Beach Road</h4>                 <p style="margin: 5px 0;"><strong>AQI:</strong> 103</p>                 <p style="margin: 5px 0;"><strong>Status:</strong> Unhealthy for Sensitive</p>                 <p style="margin: 5px 0; font-size: 12px;">                     <strong>Coordinates:</strong><br>                     Lat: 19.0198<br>                     Lon: 73.0254                 </p>             </div>             </div>`)[0];
+                popup_e532fdeb13ba6b040744e2445e002530.setContent(html_0e0a6a19aa20c9b01212c63529afd31b);
+            
+        
+
+        circle_marker_0298cd3de9ddd093659d50c3daf67893.bindPopup(popup_e532fdeb13ba6b040744e2445e002530)
+        ;
+
+        
+    
+    
+            var layer_control_d5c4306c2aa77b09c6bb926dd49763e2_layers = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_f5091cc512414a6bc84b5d4a90a5e28d,
+                    "cartodbpositron" : tile_layer_50aa120ac126ce5494d242e21e3c94fd,
+                },
+                overlays :  {
+                    "macro_element_b2eda247c72c8dc5bbe1a55febc5dca5" : heat_map_b2eda247c72c8dc5bbe1a55febc5dca5,
+                },
+            };
+            let layer_control_d5c4306c2aa77b09c6bb926dd49763e2 = L.control.layers(
+                layer_control_d5c4306c2aa77b09c6bb926dd49763e2_layers.base_layers,
+                layer_control_d5c4306c2aa77b09c6bb926dd49763e2_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_1e46e6b795f6edcdcf0d71d9447efeca);
+
+        
+</script>
+</html>

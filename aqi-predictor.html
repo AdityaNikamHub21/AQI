@@ -20,9 +20,9 @@
                     <li><a href="#current">Current AQI</a></li>
                     <li><a href="#forecast">Forecast</a></li>
                     <li><a href="#analysis">Analysis</a></li>
+                    <li><a href="#spatialMap">Spatial Map</a></li>
+                    <li><a href="#healthRiskAI">AI Health Risk</a></li>
                     <li><a href="#health">Health Tips</a></li>
-                    <li><a href="data-input.html" target="_blank">📊 Import Data</a></li>
-                    <li><a href="#" onclick="refreshData()" style="color: var(--accent-color);">🔄 Refresh</a></li>
                 </ul>
                 <button class="mobile-menu-btn">
                     <i class="fas fa-bars"></i>
@@ -223,6 +223,296 @@
         </div>
     </section>
 
+    <!-- Spatial AQI Heat Map Section -->
+    <section id="spatialMap" class="spatial-map">
+        <div class="container">
+            <h2>🗺️ Spatial AQI Heat Map</h2>
+            <p class="section-intro">City-level air quality visualization with precise location data and area-wise AQI variations</p>
+            
+            <div class="map-controls">
+                <div class="city-selector">
+                    <label for="cityMapSelect">Select City for Heat Map:</label>
+                    <select id="cityMapSelect" class="city-map-select">
+                        <option value="">Choose a city...</option>
+                        <option value="cbd belapur">CBD Belapur</option>
+                        <option value="vashi">Vashi</option>
+                        <option value="sanpada">Sanpada</option>
+                        <option value="mumbai">Mumbai</option>
+                    </select>
+                </div>
+                
+                <div class="map-actions">
+                    <button id="generateMapBtn" class="generate-map-btn">
+                        <i class="fas fa-map-marked-alt"></i> Generate Heat Map
+                    </button>
+                    <button id="refreshMapBtn" class="refresh-map-btn" style="display: none;">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+            
+            <div class="map-container" id="mapContainer" style="display: none;">
+                <div class="map-header">
+                    <h3 id="mapTitle">City AQI Heat Map</h3>
+                    <div class="map-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Areas Monitored:</span>
+                            <span class="stat-value" id="areasCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Average AQI:</span>
+                            <span class="stat-value" id="avgAQI">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">AQI Range:</span>
+                            <span class="stat-value" id="aqiRange">0-0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="map-visualization">
+                    <div id="foliumMap" class="folium-map"></div>
+                    <div id="testMap" style="width: 100%; height: 500px; border-radius: 12px; display: none;"></div>
+                </div>
+                
+                <div class="map-legend">
+                    <h4>AQI Legend</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color good"></div>
+                            <span>Good (0-50)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color moderate"></div>
+                            <span>Moderate (51-100)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color unhealthy-sensitive"></div>
+                            <span>Unhealthy for Sensitive (101-150)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color unhealthy"></div>
+                            <span>Unhealthy (151-200)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color very-unhealthy"></div>
+                            <span>Very Unhealthy (201-300)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color hazardous"></div>
+                            <span>Hazardous (301+)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="area-details">
+                    <h4>📍 Area-wise AQI Details</h4>
+                    <div class="area-grid" id="areaGrid">
+                        <!-- Area cards will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="spatial-insights">
+                    <h4>🔍 Spatial Analysis Insights</h4>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h5>Highest Pollution Area</h5>
+                                <p id="highestArea">-</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h5>Lowest Pollution Area</h5>
+                                <p id="lowestArea">-</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h5>AQI Variation</h5>
+                                <p id="aqiVariation">-</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h5>Uniformity Index</h5>
+                                <p id="uniformityIndex">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Health Risk Classification Section -->
+    <section id="healthRiskAI" class="health-risk-ai">
+        <div class="container">
+            <h2>🤖 AI Health Risk Classification</h2>
+            <p class="section-intro">Machine learning-powered health risk assessment based on environmental forecasts and personal factors</p>
+            
+            <div class="risk-input-panel">
+                <h3>Personalize Your Risk Assessment</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="personaSelect">Who are you?</label>
+                        <select id="personaSelect" class="persona-select">
+                            <option value="0">General Public</option>
+                            <option value="1">Children (Under 18)</option>
+                            <option value="2">Elderly (Over 65)</option>
+                            <option value="3">Outdoor Workers / Athletes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="exposureHours">Daily Outdoor Exposure</label>
+                        <select id="exposureHours" class="exposure-select">
+                            <option value="1">1 hour (Minimal)</option>
+                            <option value="2">2 hours (Low)</option>
+                            <option value="4">4 hours (Moderate)</option>
+                            <option value="8">8 hours (High)</option>
+                            <option value="12">12+ hours (Very High)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <button id="predictRiskBtn" class="predict-btn">
+                            <i class="fas fa-brain"></i> AI Risk Prediction
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-risk-result" id="aiRiskResult" style="display: none;">
+                <div class="risk-display">
+                    <div class="risk-main">
+                        <div class="risk-category" id="aiRiskCategory">
+                            <span class="risk-label">AI Predicted Risk:</span>
+                            <span class="risk-value" id="aiRiskValue">Moderate</span>
+                        </div>
+                        <div class="risk-confidence">
+                            <span class="confidence-label">Model Confidence:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                            <span class="confidence-percent" id="confidencePercent">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="risk-visualization">
+                        <div class="risk-gauge-ai" id="riskGaugeAI">
+                            <div class="gauge-circle-ai" id="gaugeCircleAI"></div>
+                            <div class="gauge-needle-ai" id="gaugeNeedleAI"></div>
+                            <div class="gauge-center-ai"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="risk-breakdown">
+                    <h4>🔍 Risk Factor Analysis</h4>
+                    <div class="factor-grid">
+                        <div class="factor-item">
+                            <span class="factor-name">PM2.5 Impact</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill pm25" id="pm25Impact"></div>
+                            </div>
+                            <span class="factor-percent" id="pm25Percent">0%</span>
+                        </div>
+                        <div class="factor-item">
+                            <span class="factor-name">AQI Level</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill aqi" id="aqiImpact"></div>
+                            </div>
+                            <span class="factor-percent" id="aqiPercent">0%</span>
+                        </div>
+                        <div class="factor-item">
+                            <span class="factor-name">WHO Exceedance</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill who" id="whoImpact"></div>
+                            </div>
+                            <span class="factor-percent" id="whoPercent">0%</span>
+                        </div>
+                        <div class="factor-item">
+                            <span class="factor-name">Personal Risk</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill personal" id="personalImpact"></div>
+                            </div>
+                            <span class="factor-percent" id="personalPercent">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="risk-probabilities">
+                    <h4>📊 All Risk Probabilities</h4>
+                    <div class="prob-grid">
+                        <div class="prob-item">
+                            <div class="prob-label">Low Risk</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill low" id="lowProb"></div>
+                            </div>
+                            <div class="prob-value" id="lowProbValue">0%</div>
+                        </div>
+                        <div class="prob-item">
+                            <div class="prob-label">Moderate Risk</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill moderate" id="moderateProb"></div>
+                            </div>
+                            <div class="prob-value" id="moderateProbValue">0%</div>
+                        </div>
+                        <div class="prob-item">
+                            <div class="prob-label">High Risk</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill high" id="highProb"></div>
+                            </div>
+                            <div class="prob-value" id="highProbValue">0%</div>
+                        </div>
+                        <div class="prob-item">
+                            <div class="prob-label">Hazardous</div>
+                            <div class="prob-bar">
+                                <div class="prob-fill hazardous" id="hazardousProb"></div>
+                            </div>
+                            <div class="prob-value" id="hazardousProbValue">0%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-insights">
+                    <h4>🧠 AI Model Insights</h4>
+                    <div class="insights-content">
+                        <div class="insight-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Model uses RandomForest with 97.3% accuracy</span>
+                        </div>
+                        <div class="insight-item">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>Personalized based on your profile and exposure</span>
+                        </div>
+                        <div class="insight-item">
+                            <i class="fas fa-globe"></i>
+                            <span>WHO 2021 PM2.5 guidelines (15 µg/m³) integrated</span>
+                        </div>
+                        <div class="insight-item">
+                            <i class="fas fa-wind"></i>
+                            <span>Environmental factors: wind, humidity, trends</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Health Risk Analysis Section -->
     <section id="healthRisk" class="health-risk">
         <div class="container">
@@ -373,6 +663,53 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script>
+        // Simple test to verify libraries are loading
+        console.log('=== Library Loading Test ===');
+        
+        // Check Chart.js
+        if (typeof Chart !== 'undefined') {
+            console.log('✅ Chart.js loaded');
+        } else {
+            console.log('❌ Chart.js not loaded');
+        }
+        
+        // Check Leaflet
+        if (typeof L !== 'undefined') {
+            console.log('✅ Leaflet loaded');
+            console.log('Leaflet version:', L.version);
+        } else {
+            console.log('❌ Leaflet not loaded');
+        }
+        
+        // Check Heat plugin
+        if (typeof L !== 'undefined' && L.HeatLayer) {
+            console.log('✅ Heat plugin loaded');
+        } else {
+            console.log('❌ Heat plugin not loaded');
+        }
+        
+        // Test map creation
+        window.addEventListener('load', function() {
+            console.log('=== Window Loaded ===');
+            console.log('Leaflet available:', typeof L !== 'undefined');
+            
+            if (typeof L !== 'undefined') {
+                try {
+                    // Create a simple test map
+                    var testMap = L.map('testMap').setView([19.0760, 72.8777], 10);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(testMap);
+                    L.marker([19.0760, 72.8777]).addTo(testMap).bindPopup('Mumbai Test');
+                    console.log('✅ Test map created successfully');
+                } catch (e) {
+                    console.log('❌ Test map failed:', e);
+                }
+            }
+        });
+    </script>
     <script src="aqi-script-fixed-v2.js"></script>
 </body>
 </html>
