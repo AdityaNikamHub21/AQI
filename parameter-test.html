@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parameter Update Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .parameter { display: flex; justify-content: space-between; padding: 5px 0; }
+        .real-data { color: green; }
+        .old-data { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Parameter Update Test</h1>
+    
+    <div class="test-section">
+        <h2>Expected Real Parameters</h2>
+        <div class="parameter">
+            <span>PM2.5:</span>
+            <span class="real-data">99 μg/m³</span>
+        </div>
+        <div class="parameter">
+            <span>PM10:</span>
+            <span class="real-data">53 μg/m³</span>
+        </div>
+        <div class="parameter">
+            <span>O₃:</span>
+            <span class="real-data">18.7 μg/m³</span>
+        </div>
+        <div class="parameter">
+            <span>NO₂:</span>
+            <span class="real-data">18.8 μg/m³</span>
+        </div>
+        <div class="parameter">
+            <span>SO₂:</span>
+            <span class="real-data">3.6 μg/m³</span>
+        </div>
+        <div class="parameter">
+            <span>CO:</span>
+            <span class="real-data">5.5 mg/m³</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Website Parameters Test</h2>
+        <button onclick="testParameters()">Test CBD Belapur Parameters</button>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Main Website Test</h2>
+        <button onclick="window.open('/aqi-predictor.html', '_blank')">Open Main Website</button>
+        <p>Instructions:</p>
+        <ol>
+            <li>Type "CBD Belapur" in the location field</li>
+            <li>Check if parameters show real values (not zeros)</li>
+            <li>PM2.5 should show 99, PM10 should show 53</li>
+            <li>All parameters should have real values, not "No Data"</li>
+        </ol>
+    </div>
+
+    <script>
+        async function testParameters() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // Test API call
+                const response = await fetch('http://localhost:5001/current-aqi/cbd%20belapur');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<h3>✅ API Response:</h3>';
+                    html += '<div class="parameter">';
+                    html += `<span>AQI:</span><span class="real-data">${data.data.aqi}</span>`;
+                    html += '</div>';
+                    
+                    const params = {
+                        'PM2.5': data.data.pm25,
+                        'PM10': data.data.pm10,
+                        'O₃': data.data.o3,
+                        'NO₂': data.data.no2,
+                        'SO₂': data.data.so2,
+                        'CO': data.data.co
+                    };
+                    
+                    for (const [name, value] of Object.entries(params)) {
+                        const isReal = value && value > 0;
+                        const className = isReal ? 'real-data' : 'old-data';
+                        const unit = name === 'CO' ? 'mg/m³' : 'μg/m³';
+                        html += `<div class="parameter">`;
+                        html += `<span>${name}:</span><span class="${className}">${value} ${unit}</span>`;
+                        html += `</div>`;
+                    }
+                    
+                    // Check if all parameters are real
+                    const realCount = Object.values(params).filter(v => v && v > 0).length;
+                    html += `<p><strong>Real Parameters: ${realCount}/6</strong></p>`;
+                    
+                    if (realCount === 6) {
+                        html += '<p style="color: green; font-weight: bold;">✅ All parameters are real and updated!</p>';
+                    } else {
+                        html += '<p style="color: orange; font-weight: bold;">⚠️ Some parameters may not be updating</p>';
+                    }
+                    
+                    results.innerHTML = html;
+                } else {
+                    results.innerHTML = `<p style="color: red;">❌ API Error: ${data.message}</p>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">❌ Network Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Auto-test on load
+        testParameters();
+    </script>
+</body>
+</html>

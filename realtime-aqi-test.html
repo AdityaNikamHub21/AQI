@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time AQI Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .warning { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .aqi-display { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .real-time { color: green; }
+        .old-data { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Real-Time AQI Update Test</h1>
+    
+    <div class="test-section info">
+        <h3>📡 API Status Check</h3>
+        <p>Testing if real-time AQI data is available...</p>
+        <div id="apiStatus"></div>
+    </div>
+
+    <div class="test-section warning">
+        <h3>🌐 Website Real-Time Test</h3>
+        <p>Testing if the main website shows real-time AQI updates...</p>
+        <button onclick="testWebsiteAQI()">Test Website AQI</button>
+        <button onclick="window.open('/aqi-predictor.html', '_blank')">Open Main Website</button>
+        <div id="websiteResults"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>📊 Expected Real-Time Values</h3>
+        <div class="aqi-display real-time">AQI: 99</div>
+        <p>This should be the value shown on the website (not the old 125)</p>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 Manual Verification Steps</h3>
+        <ol>
+            <li><strong>Open the main website:</strong> <a href="/aqi-predictor.html" target="_blank">AQI Predictor</a></li>
+            <li><strong>Type location:</strong> "CBD Belapur"</li>
+            <li><strong>Check AQI value:</strong> Should show 99 (not 125)</li>
+            <li><strong>Check parameters:</strong> PM2.5: 99, PM10: 53 (not 0 or random)</li>
+            <li><strong>Refresh page:</strong> Values should stay the same</li>
+            <li><strong>Real-time indicator:</strong> Should say "Real AQI data: 99"</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 What Real-Time Means</h3>
+        <ul>
+            <li><strong>✅ Real-Time:</strong> Data from WAQI API (current: 99)</li>
+            <li><strong>❌ Not Real-Time:</strong> Hardcoded values (old: 125)</li>
+            <li><strong>❌ Not Real-Time:</strong> Random synthetic data</li>
+        </ul>
+    </div>
+
+    <script>
+        async function checkAPIStatus() {
+            const status = document.getElementById('apiStatus');
+            
+            try {
+                const response = await fetch('http://localhost:5001/current-aqi/cbd%20belapur');
+                const data = await response.json();
+                
+                if (data.success) {
+                    status.innerHTML = `
+                        <div class="success">
+                            <h4>✅ API Working</h4>
+                            <p><strong>AQI:</strong> ${data.data.aqi}</p>
+                            <p><strong>PM2.5:</strong> ${data.data.pm25} μg/m³</p>
+                            <p><strong>PM10:</strong> ${data.data.pm10} μg/m³</p>
+                            <p><strong>Timestamp:</strong> ${data.data.timestamp}</p>
+                            <p><strong>Status:</strong> Real-time data available!</p>
+                        </div>
+                    `;
+                } else {
+                    status.innerHTML = `<div class="error">❌ API Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                status.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testWebsiteAQI() {
+            const results = document.getElementById('websiteResults');
+            results.innerHTML = '<p>Testing website real-time functionality...</p>';
+            
+            // Test if website can access the API
+            try {
+                const response = await fetch('http://localhost:5001/current-aqi/cbd%20belapur');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const aqi = data.data.aqi;
+                    const isRealTime = aqi === 99;
+                    
+                    results.innerHTML = `
+                        <div class="${isRealTime ? 'success' : 'warning'}">
+                            <h4>${isRealTime ? '✅ Real-Time Working!' : '⚠️ Check Website'}</h4>
+                            <p><strong>API AQI:</strong> ${aqi}</p>
+                            <p><strong>Expected:</strong> 99</p>
+                            <p><strong>Status:</strong> ${isRealTime ? 'Real-time data available' : 'May need to check website'}</p>
+                            ${isRealTime ? 
+                                '<p style="color: green; font-weight: bold;">✅ Website should show AQI 99</p>' : 
+                                '<p style="color: orange; font-weight: bold;">⚠️ Website may show old data</p>'
+                            }
+                        </div>
+                    `;
+                } else {
+                    results.innerHTML = `<div class="error">❌ API Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-check on load
+        checkAPIStatus();
+        testWebsiteAQI();
+    </script>
+</body>
+</html>

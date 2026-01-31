@@ -38,7 +38,7 @@
                 <h1>Breathe Better Tomorrow</h1>
                 <p>Advanced Air Quality Index prediction powered by machine learning</p>
                 <div class="location-input">
-                    <input type="text" id="locationInput" placeholder="Enter your city..." value="CBD Belapur">
+                    <input type="text" id="locationInput" placeholder="Enter your city..." value="">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
                 </div>
             </div>
@@ -60,11 +60,10 @@
             <h2>Current Air Quality</h2>
             <div class="aqi-display">
                 <div class="aqi-main">
-                    <div class="aqi-value" id="currentAQI">~125</div>
-                    <div class="aqi-label" id="aqiLabel">Unhealthy for Sensitive</div>
-                    <div class="aqi-location" id="currentLocation">CBD Belapur, India</div>
-                    <div class="aqi-time" id="updateTime">Updated just now</div>
-                    <div style="margin-top: 0.5rem; color: var(--text-light); font-size: 0.9rem; font-style: italic;">*Approximate values based on available data</div>
+                    <div class="aqi-value" id="currentAQI"></div>
+                    <div class="aqi-label" id="aqiLabel"></div>
+                    <div class="aqi-location" id="currentLocation"></div>
+                    <div class="aqi-time" id="updateTime"></div>
                 </div>
                 <div class="aqi-gauge">
                     <div class="gauge-container">
@@ -130,11 +129,10 @@
     <!-- Forecast Section -->
     <section id="forecast" class="forecast">
         <div class="container">
-            <h2>AQI Trend - Last 6 Days</h2>
+            <h2>AQI Trend - Hourly Forecasts</h2>
             <div class="forecast-controls">
-                <button class="forecast-btn active" data-range="7">Last 6 Days</button>
-                <button class="forecast-btn" data-range="14">14 Days</button>
-                <button class="forecast-btn" data-range="30">30 Days</button>
+                <button class="forecast-btn active" data-range="6">After 6 Hours</button>
+                <button class="forecast-btn" data-range="12">After 12 Hours</button>
             </div>
             <div class="forecast-chart">
                 <canvas id="forecastChart"></canvas>
@@ -313,6 +311,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="aqi-script.js"></script>
+    <script src="aqi-script-fixed.js"></script>
 </body>
 </html>

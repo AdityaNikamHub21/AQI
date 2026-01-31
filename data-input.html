@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Data Input - Feed Raw Data</title>
+    <link rel="stylesheet" href="aqi-style.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: var(--bg-light);
+        }
+        
+        .data-input-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .input-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .input-method {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .input-method h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload {
+            border: 2px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload:hover {
+            background: var(--bg-light);
+        }
+        
+        .file-upload.dragover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+        
+        .api-form {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .api-form input, .api-form select {
+            padding: 0.8rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .data-preview {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .sample-data {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            margin: 1rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.success {
+            background: #10b981;
+        }
+        
+        .notification.error {
+            background: #ef4444;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="data-input-section">
+        <h1>📊 Feed Raw AQI Data</h1>
+        <p>Choose your preferred method to input air quality data</p>
+        
+        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+            <div class="warning-message">
+                <strong>⚠️ Important:</strong> Currently only CBD Belapur, Sanpada, and Vashi data are supported by the AQI predictor. 
+                Make sure your data contains one of these locations.
+            </div>
+        </div>
+        
+        <div class="input-methods">
+            <!-- Method 1: File Upload -->
+            <div class="input-method">
+                <h3>📁 Upload CSV/JSON File</h3>
+                <div class="file-upload" id="fileUpload">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>Drag & drop your file here or click to browse</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Supported: CSV, JSON, TXT</p>
+                </div>
+                <input type="file" id="fileInput" accept=".csv,.json,.txt" style="display: none;">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                <div id="fileInfo" style="margin-top: 1rem; color: var(--text-light);"></div>
+            </div>
+            
+            <!-- Method 2: Manual Input -->
+            <div class="input-method">
+                <h3>⌨️ Manual Data Entry</h3>
+                <p>Enter your AQI data in JSON format:</p>
+                <textarea id="manualData" placeholder='[
+  {
+    "location": "New Delhi",
+    "aqi": 152,
+    "pm25": 85,
+    "pm10": 120,
+    "o3": 45,
+    "no2": 38,
+    "so2": 12,
+    "co": 0.8,
+    "timestamp": "2024-01-31T12:00:00Z"
+  }
+]'></textarea>
+                <button class="btn" onclick="processManualData()">Process Data</button>
+            </div>
+            
+            <!-- Method 3: API Endpoint -->
+            <div class="input-method">
+                <h3>🌐 API Integration</h3>
+                <div class="api-form">
+                    <input type="url" id="apiUrl" placeholder="Enter API endpoint URL">
+                    <select id="apiMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                    </select>
+                    <input type="text" id="apiKey" placeholder="API Key (if required)">
+                    <button class="btn" onclick="fetchAPIData()">Fetch from API</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sample Data Section -->
+        <div class="data-preview">
+            <h3>📋 Sample Data Format</h3>
+            <p>Use this format for your data input:</p>
+            <div class="sample-data">[
+  {
+    "location": "CBD Belapur",
+    "aqi": 125,
+    "pm25": 68,
+    "pm10": 95,
+    "o3": 38,
+    "no2": 32,
+    "no": 15,
+    "so2": 9,
+    "co": 0.6,
+    "windSpeed": 12,
+    "humidity": 65,
+    "timestamp": "2024-01-31T12:00:00Z"
+  },
+  {
+    "location": "Mumbai",
+    "aqi": 95,
+    "pm25": 55,
+    "pm10": 80,
+    "o3": 35,
+    "no2": 28,
+    "no": 12,
+    "so2": 8,
+    "co": 0.6,
+    "windSpeed": 15,
+    "humidity": 70,
+    "timestamp": "2024-01-31T12:00:00Z"
+  }
+]</div>
+            
+            <h3>🔗 Free AQI APIs</h3>
+            <ul>
+                <li><strong>OpenWeatherMap:</strong> https://api.openweathermap.org/data/2.5/air_pollution</li>
+                <li><strong>IQAir:</strong> https://api.iqair.com/v1/nearest-city</li>
+                <li><strong>World Air Quality Index:</strong> https://api.waqi.info/feed/city/</li>
+                <li><strong>US EPA:</strong> https://aqs.epa.gov/data/api/</li>
+            </ul>
+        </div>
+        
+        <!-- Data Processing Results -->
+        <div id="results" class="data-preview" style="display: none;">
+            <h3>📈 Processing Results</h3>
+            <div id="resultsContent"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button class="btn" onclick="applyToPredictor()">Apply to AQI Predictor</button>
+                <button class="btn" style="background: var(--secondary-color);" onclick="window.open('aqi-predictor.html', '_blank')">Open Predictor Manually</button>
+            </div>
+            <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                💡 If the automatic apply doesn't work, click "Open Predictor Manually" and the data will be loaded automatically.
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        let processedData = [];
+        
+        // File Upload Handling
+        const fileUpload = document.getElementById('fileUpload');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        
+        // Click to upload
+        fileUpload.addEventListener('click', () => {
+            console.log('File upload clicked');
+            fileInput.click();
+        });
+        
+        // Drag and drop
+        fileUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+        
+        fileUpload.addEventListener('dragleave', () => {
+            fileUpload.classList.remove('dragover');
+        });
+        
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            console.log('Files dropped:', e.dataTransfer.files);
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            console.log('File input changed:', e.target.files);
+            handleFiles(e.target.files);
+        });
+        
+        function handleFiles(files) {
+            console.log('Handling files:', files.length);
+            
+            if (files.length === 0) {
+                showNotification('No file selected', 'error');
+                return;
+            }
+            
+            const file = files[0];
+            console.log('Processing file:', file.name, file.type, file.size);
+            
+            // Update file info
+            fileInfo.innerHTML = `
+                <strong>Selected:</strong> ${file.name}<br>
+                <strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+                <strong>Type:</strong> ${file.type || 'Unknown'}
+            `;
+            
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                console.log('File loaded successfully');
+                const content = e.target.result;
+                const fileType = file.name.split('.').pop().toLowerCase();
+                
+                try {
+                    let data;
+                    if (fileType === 'json') {
+                        data = JSON.parse(content);
+                    } else if (fileType === 'csv') {
+                        data = parseCSV(content);
+                    } else {
+                        // Try to parse as JSON
+                        data = JSON.parse(content);
+                    }
+                    
+                    console.log('Parsed data:', data);
+                    processedData = data;
+                    displayResults(data);
+                    showNotification('File processed successfully!', 'success');
+                } catch (error) {
+                    console.error('Error parsing file:', error);
+                    showNotification('Error parsing file: ' + error.message, 'error');
+                }
+            };
+            
+            reader.onerror = (error) => {
+                console.error('Error reading file:', error);
+                showNotification('Error reading file', 'error');
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function parseCSV(csv) {
+            console.log('Parsing CSV');
+            const lines = csv.split('\n').filter(line => line.trim());
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        let value = values[index];
+                        
+                        // Convert numeric fields
+                        if (header.toLowerCase().includes('aqi') || 
+                            header.toLowerCase().includes('pm') || 
+                            header.toLowerCase().includes('o3') || 
+                            header.toLowerCase().includes('no2') || 
+                            header.toLowerCase().includes('so2') || 
+                            header.toLowerCase().includes('co') || 
+                            header.toLowerCase().includes('speed')) {
+                            value = isNaN(value) ? 0 : parseFloat(value);
+                        }
+                        
+                        obj[header] = value;
+                    });
+                    data.push(obj);
+                }
+            }
+            
+            console.log('Parsed CSV data:', data);
+            return data;
+        }
+        
+        function processManualData() {
+            console.log('Processing manual data');
+            const textarea = document.getElementById('manualData');
+            const content = textarea.value.trim();
+            
+            if (!content) {
+                showNotification('Please enter some data', 'error');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(content);
+                console.log('Manual data parsed:', data);
+                processedData = data;
+                displayResults(data);
+                showNotification('Manual data processed successfully!', 'success');
+            } catch (error) {
+                console.error('Error parsing manual data:', error);
+                showNotification('Invalid JSON format: ' + error.message, 'error');
+            }
+        }
+        
+        async function fetchAPIData() {
+            console.log('Fetching API data');
+            const url = document.getElementById('apiUrl').value.trim();
+            const method = document.getElementById('apiMethod').value;
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!url) {
+                showNotification('Please enter an API URL', 'error');
+                return;
+            }
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {}
+                };
+                
+                if (apiKey) {
+                    options.headers['Authorization'] = `Bearer ${apiKey}`;
+                }
+                
+                console.log('Fetching from:', url, options);
+                showNotification('Fetching data from API...', 'info');
+                
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('API response:', data);
+                
+                processedData = Array.isArray(data) ? data : [data];
+                displayResults(processedData);
+                showNotification('API data fetched successfully!', 'success');
+            } catch (error) {
+                console.error('Error fetching API data:', error);
+                showNotification('Error fetching API data: ' + error.message, 'error');
+            }
+        }
+        
+        function displayResults(data) {
+            console.log('Displaying results for', data.length, 'records');
+            const resultsDiv = document.getElementById('results');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            resultsDiv.style.display = 'block';
+            resultsContent.innerHTML = `
+                <p><strong>✅ Successfully processed ${data.length} data points</strong></p>
+                <div class="sample-data">${JSON.stringify(data.slice(0, 2), null, 2)}</div>
+                ${data.length > 2 ? `<p>... and ${data.length - 2} more records</p>` : ''}
+            `;
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function applyToPredictor() {
+            console.log('Applying data to predictor');
+            if (processedData.length === 0) {
+                showNotification('No data to apply', 'error');
+                return;
+            }
+            
+            try {
+                // Store data in localStorage for the predictor to use
+                localStorage.setItem('aqiRawData', JSON.stringify(processedData));
+                console.log('Data stored in localStorage');
+                
+                // Verify data was stored
+                const storedData = localStorage.getItem('aqiRawData');
+                console.log('Verified stored data:', storedData ? 'Success' : 'Failed');
+                
+                showNotification('Data applied! Opening predictor...', 'success');
+                
+                // Try multiple methods to open the predictor
+                setTimeout(() => {
+                    // Method 1: Try window.open
+                    try {
+                        const newWindow = window.open('aqi-predictor.html', '_blank');
+                        if (!newWindow) {
+                            throw new Error('Popup blocked');
+                        }
+                        console.log('Predictor opened in new window');
+                    } catch (error) {
+                        console.log('Window.open failed, trying same window');
+                        // Method 2: Same window
+                        window.location.href = 'aqi-predictor.html';
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('Error applying data:', error);
+                showNotification('Error applying data: ' + error.message, 'error');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            console.log('Notification:', message, type);
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Load sample data for testing
+        window.addEventListener('load', () => {
+            console.log('Data input page loaded');
+            
+            // Try to load sample data
+            fetch('sample-aqi-data.json')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Sample data loaded:', data);
+                    document.getElementById('manualData').value = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.log('Sample data not found, using default');
+                    // Set default sample data for Sanpada
+                    const sampleData = [
+                        {
+                            "location": "Sanpada",
+                            "aqi": 97,
+                            "pm25": 58,
+                            "pm10": 82,
+                            "o3": 33,
+                            "no2": 25,
+                            "no": 11,
+                            "so2": 7,
+                            "co": 0.45,
+                            "windSpeed": 8,
+                            "humidity": 68,
+                            "timestamp": "2024-01-31T12:00:00Z"
+                        }
+                    ];
+                    document.getElementById('manualData').value = JSON.stringify(sampleData, null, 2);
+                });
+        });
+    </script>
+</body>
+</html>

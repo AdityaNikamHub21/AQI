@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fixed Parameter Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .parameter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .parameter-card { padding: 15px; border: 1px solid #ddd; border-radius: 5px; text-align: center; background: white; }
+        .parameter-name { font-weight: bold; margin-bottom: 5px; }
+        .parameter-value { font-size: 1.2em; color: #007bff; font-weight: bold; }
+        .consistent { color: green; }
+        .inconsistent { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fixed Parameter Test</h1>
+    
+    <div class="test-result success">
+        <h3>✅ FIXED: Random Parameter Changes</h3>
+        <p>The JavaScript has been updated to use only real-time data from the API. No more random values!</p>
+    </div>
+
+    <div class="test-result info">
+        <h3>📊 Expected Consistent Values</h3>
+        <p>These values should remain the same every time you test:</p>
+        <div class="parameter-grid">
+            <div class="parameter-card">
+                <div class="parameter-name">AQI</div>
+                <div class="parameter-value consistent">99</div>
+            </div>
+            <div class="parameter-card">
+                <div class="parameter-name">PM2.5</div>
+                <div class="parameter-value consistent">99 μg/m³</div>
+            </div>
+            <div class="parameter-card">
+                <div class="parameter-name">PM10</div>
+                <div class="parameter-value consistent">53 μg/m³</div>
+            </div>
+            <div class="parameter-card">
+                <div class="parameter-name">O₃</div>
+                <div class="parameter-value consistent">18.7 μg/m³</div>
+            </div>
+            <div class="parameter-card">
+                <div class="parameter-name">NO₂</div>
+                <div class="parameter-value consistent">18.8 μg/m³</div>
+            </div>
+            <div class="parameter-card">
+                <div class="parameter-name">SO₂</div>
+                <div class="parameter-value consistent">3.6 μg/m³</div>
+            </div>
+        </div>
+    </div>
+
+    <h2>🧪 Consistency Test</h2>
+    <button onclick="testConsistency()">Test Multiple Times</button>
+    <div id="testResults"></div>
+
+    <h2>🌐 Main Website Test</h2>
+    <button onclick="window.open('/aqi-predictor.html', '_blank')">Open Fixed Website</button>
+    
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+        <h3>Verification Steps:</h3>
+        <ol>
+            <li>Open the main website</li>
+            <li>Type "CBD Belapur"</li>
+            <li>Refresh the page multiple times</li>
+            <li>Parameters should stay the same (99, 53, 18.7, etc.)</li>
+            <li>No more random changes!</li>
+        </ol>
+    </div>
+
+    <h2>🔧 What Was Fixed</h2>
+    <div style="background: #e9ecef; padding: 15px; border-radius: 5px;">
+        <ul>
+            <li>✅ Removed random value generation in updatePollutants()</li>
+            <li>✅ Ensured updatePollutantsWithRealData() always uses API data</li>
+            <li>✅ Fixed cached data to use real values</li>
+            <li>✅ Prevented synthetic data from overriding real data</li>
+        </ul>
+    </div>
+
+    <script>
+        let testCount = 0;
+        const expectedValues = {
+            aqi: 99,
+            pm25: 99,
+            pm10: 53,
+            o3: 18.7,
+            no2: 18.8,
+            so2: 3.6,
+            co: 5.5
+        };
+
+        async function testConsistency() {
+            const results = document.getElementById('testResults');
+            testCount++;
+            
+            results.innerHTML = `<p>Running test ${testCount}...</p>`;
+            
+            try {
+                const response = await fetch('http://localhost:5001/current-aqi/cbd%20belapur');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<div class="test-result info">`;
+                    html += `<h4>Test ${testCount} Results:</h4>`;
+                    
+                    const params = [
+                        { name: 'AQI', value: data.data.aqi, expected: expectedValues.aqi },
+                        { name: 'PM2.5', value: data.data.pm25, expected: expectedValues.pm25 },
+                        { name: 'PM10', value: data.data.pm10, expected: expectedValues.pm10 },
+                        { name: 'O₃', value: data.data.o3, expected: expectedValues.o3 },
+                        { name: 'NO₂', value: data.data.no2, expected: expectedValues.no2 },
+                        { name: 'SO₂', value: data.data.so2, expected: expectedValues.so2 },
+                        { name: 'CO', value: data.data.co, expected: expectedValues.co }
+                    ];
+                    
+                    let allConsistent = true;
+                    params.forEach(param => {
+                        const isConsistent = Math.abs(param.value - param.expected) < 0.1;
+                        const className = isConsistent ? 'consistent' : 'inconsistent';
+                        const unit = param.name === 'CO' ? 'mg/m³' : 'μg/m³';
+                        html += `<div style="display: flex; justify-content: space-between; padding: 5px;">`;
+                        html += `<span>${param.name}:</span>`;
+                        html += `<span class="${className}">${param.value} ${unit}</span>`;
+                        html += `</div>`;
+                        if (!isConsistent) allConsistent = false;
+                    });
+                    
+                    if (allConsistent) {
+                        html += `<p style="color: green; font-weight: bold;">✅ All values consistent!</p>`;
+                    } else {
+                        html += `<p style="color: orange; font-weight: bold;">⚠️ Some values changed</p>`;
+                    }
+                    
+                    html += `</div>`;
+                    results.innerHTML = html;
+                } else {
+                    results.innerHTML = `<div class="test-result error">❌ API Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="test-result error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-test on load
+        testConsistency();
+    </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Predictor - Debug Mode</title>
+    <link rel="stylesheet" href="aqi-style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 AQI Predictor - Debug Mode</h1>
+            <p>Real-time Air Quality Monitoring with Debug Info</p>
+        </header>
+
+        <main>
+            <section class="search-section">
+                <div class="search-container">
+                    <input type="text" id="locationInput" placeholder="Enter location (CBD Belapur, Vashi, Sanpada, Mumbai)">
+                    <button id="searchBtn">🔍 Search</button>
+                </div>
+                <div id="debugInfo" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                    Debug: Waiting for input...
+                </div>
+            </section>
+
+            <section class="aqi-display">
+                <div class="aqi-value-container">
+                    <div class="aqi-value" id="currentAQI">0</div>
+                    <div class="aqi-label" id="aqiLabel"></div>
+                </div>
+                <div class="location-info">
+                    <div class="location-name" id="currentLocation"></div>
+                    <div class="update-time" id="updateTime"></div>
+                </div>
+            </section>
+
+            <section class="gauge-section">
+                <div class="gauge-container">
+                    <div class="gauge-circle" id="gaugeCircle"></div>
+                    <div class="gauge-needle" id="gaugeNeedle"></div>
+                    <div class="gauge-center"></div>
+                    <div class="gauge-labels">
+                        <span class="label-good">Good</span>
+                        <span class="label-moderate">Moderate</span>
+                        <span class="label-unhealthy-sensitive">Unhealthy for Sensitive</span>
+                        <span class="label-unhealthy">Unhealthy</span>
+                        <span class="label-very-unhealthy">Very Unhealthy</span>
+                        <span class="label-hazardous">Hazardous</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pollutants-section">
+                <h2>Pollutant Levels</h2>
+                <div class="pollutants-grid">
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">PM2.5</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">PM10</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">O₃</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">NO₂</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">NO</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">SO₂</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">CO</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">💨</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">💧</div>
+                        <div class="pollutant-value">0</div>
+                        <div class="pollutant-status">No Data</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="forecast-section">
+                <h2>AQI Forecast</h2>
+                <div class="forecast-controls">
+                    <button class="forecast-btn active" data-range="6">After 6 Hours</button>
+                    <button class="forecast-btn" data-range="12">After 12 Hours</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        class DebugAQIPredictor {
+            constructor() {
+                this.currentAQI = 0;
+                this.currentLocation = '';
+                this.cityChangeTimeout = null;
+                this.forecastChart = null;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.initForecastChart();
+                this.updateAQIDisplay();
+                this.updateDebug('Initialized successfully');
+            }
+
+            updateDebug(message) {
+                const debugInfo = document.getElementById('debugInfo');
+                debugInfo.innerHTML = `Debug: ${message}<br>Current AQI: ${this.currentAQI}<br>Location: ${this.currentLocation}`;
+            }
+
+            setupEventListeners() {
+                const locationInput = document.getElementById('locationInput');
+                const searchBtn = document.getElementById('searchBtn');
+                
+                searchBtn.addEventListener('click', () => {
+                    this.updateDebug('Search button clicked');
+                    this.searchLocation();
+                });
+                
+                locationInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.updateDebug('Enter key pressed');
+                        this.searchLocation();
+                    }
+                });
+                
+                locationInput.addEventListener('input', (e) => {
+                    this.updateDebug(`Input changed: "${e.target.value}"`);
+                    this.handleCityChange(e.target.value.trim());
+                });
+
+                document.querySelectorAll('.forecast-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.forecast-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.updateForecastRange(parseInt(e.target.dataset.range));
+                    });
+                });
+            }
+
+            handleCityChange(newLocation) {
+                this.updateDebug(`City change: "${newLocation}"`);
+                
+                if (this.cityChangeTimeout) {
+                    clearTimeout(this.cityChangeTimeout);
+                }
+                
+                this.cityChangeTimeout = setTimeout(() => {
+                    const supportedCities = ['cbd belapur', 'vashi', 'sanpada', 'mumbai'];
+                    const normalizedLocation = newLocation.toLowerCase();
+                    
+                    if (supportedCities.includes(normalizedLocation) && normalizedLocation !== this.currentLocation.toLowerCase()) {
+                        this.updateDebug(`Switching to ${newLocation}`);
+                        this.simulateAQIFetch(newLocation);
+                    }
+                }, 800);
+            }
+
+            searchLocation() {
+                const location = document.getElementById('locationInput').value.trim();
+                this.updateDebug(`Searching for: "${location}"`);
+                
+                if (!location) {
+                    this.showNotification('Please enter a location', 'error');
+                    return;
+                }
+                
+                const supportedCities = ['cbd belapur', 'vashi', 'sanpada', 'mumbai'];
+                if (!supportedCities.includes(location.toLowerCase())) {
+                    this.showNotification('Data not available for this location. Try: CBD Belapur, Vashi, Sanpada, or Mumbai', 'error');
+                    return;
+                }
+                
+                this.currentLocation = location;
+                this.simulateAQIFetch(location);
+                this.showNotification(`Fetching AQI data for ${location}...`, 'info');
+            }
+
+            simulateAQIFetch(location) {
+                this.updateDebug(`Fetching data for ${location}...`);
+                
+                fetch(`http://localhost:5001/current-aqi/${location}`)
+                    .then(response => {
+                        this.updateDebug(`API response status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        this.updateDebug(`API data: ${JSON.stringify(data)}`);
+                        
+                        if (data.success && data.data) {
+                            this.currentAQI = Math.round(data.data.aqi);
+                            this.currentLocation = location;
+                            
+                            this.updateDebug(`Real data received: AQI ${this.currentAQI}`);
+                            this.updatePollutantsWithRealData(data.data);
+                            this.updateAQIDisplay();
+                            this.updateForecastChart();
+                            this.showNotification(`Real AQI data: ${this.currentAQI} for ${location}`, 'success');
+                        } else {
+                            this.updateDebug(`API error: ${data.message}`);
+                            this.useFallbackData(location);
+                        }
+                    })
+                    .catch(error => {
+                        this.updateDebug(`API error: ${error.message}`);
+                        console.log('API call failed, using fallback data:', error);
+                        this.useFallbackData(location);
+                    });
+            }
+
+            useFallbackData(location) {
+                this.updateDebug(`Using fallback data for ${location}`);
+                
+                setTimeout(() => {
+                    if (location.toLowerCase() === 'cbd belapur') {
+                        this.currentAQI = 125;
+                        this.currentLocation = location;
+                        this.updateAQIDisplay();
+                        this.updateForecastChart();
+                        this.showNotification(`Using fallback data for ${location} (AQI: ${this.currentAQI})`, 'info');
+                    }
+                }, 500);
+            }
+
+            updatePollutantsWithRealData(data) {
+                this.updateDebug(`Updating pollutants with real data`);
+                const pollutantCards = document.querySelectorAll('.pollutant-card');
+                
+                const pollutantValues = {
+                    'PM2.5': data.pm25 || 0,
+                    'PM10': data.pm10 || 0,
+                    'O₃': data.o3 || 0,
+                    'NO₂': data.no2 || 0,
+                    'NO': data.no || 0,
+                    'SO₂': data.so2 || 0,
+                    'CO': data.co || 0,
+                    '💨': data.wind_speed || 0,
+                    '💧': data.humidity || 0
+                };
+
+                const pollutants = ['PM2.5', 'PM10', 'O₃', 'NO₂', 'NO', 'SO₂', 'CO', '💨', '💧'];
+                
+                pollutantCards.forEach((card, index) => {
+                    const pollutant = pollutants[index];
+                    const value = pollutantValues[pollutant];
+                    
+                    let displayValue;
+                    if (pollutant === 'CO') {
+                        displayValue = value > 0 ? value.toFixed(1) : '0';
+                    } else {
+                        displayValue = value > 0 ? Math.round(value) : '0';
+                    }
+                    
+                    card.querySelector('.pollutant-value').textContent = displayValue;
+                    
+                    const statusElement = card.querySelector('.pollutant-status');
+                    const aqiInfo = this.getAQIInfo(data.aqi);
+                    statusElement.textContent = aqiInfo.label;
+                    statusElement.className = `pollutant-status ${aqiInfo.level}`;
+                });
+            }
+
+            updateAQIDisplay() {
+                if (this.currentAQI === 0 || this.currentLocation === '') {
+                    document.getElementById('currentAQI').textContent = '0';
+                    document.getElementById('currentLocation').textContent = '';
+                    document.getElementById('updateTime').textContent = '';
+                    document.getElementById('aqiLabel').textContent = '';
+                    this.updateGauge(0);
+                    this.updatePollutants(0);
+                    return;
+                }
+                
+                document.getElementById('currentAQI').textContent = '~' + this.currentAQI;
+                document.getElementById('currentLocation').textContent = this.currentLocation + ', India';
+                document.getElementById('updateTime').textContent = 'Updated just now';
+                
+                const aqiInfo = this.getAQIInfo(this.currentAQI);
+                document.getElementById('aqiLabel').textContent = aqiInfo.label;
+                
+                const aqiValueElement = document.querySelector('.aqi-value');
+                aqiValueElement.style.background = aqiInfo.color;
+                aqiValueElement.style.webkitBackgroundClip = 'text';
+                aqiValueElement.style.webkitTextFillColor = 'transparent';
+                
+                this.updateGauge(this.currentAQI);
+                this.updatePollutants(this.currentAQI);
+            }
+
+            updateGauge(aqi) {
+                const needle = document.getElementById('gaugeNeedle');
+                const gaugeCircle = document.getElementById('gaugeCircle');
+                
+                if (!needle || !gaugeCircle) {
+                    return;
+                }
+                
+                let angle;
+                if (aqi === 0) {
+                    angle = 0;
+                } else if (aqi <= 50) {
+                    angle = (aqi / 50) * 72;
+                } else if (aqi <= 100) {
+                    angle = 72 + ((aqi - 50) / 50) * 72;
+                } else if (aqi <= 150) {
+                    angle = 144 + ((aqi - 100) / 50) * 72;
+                } else if (aqi <= 200) {
+                    angle = 216 + ((aqi - 150) / 50) * 72;
+                } else if (aqi <= 300) {
+                    angle = 288 + ((aqi - 200) / 100) * 36;
+                } else {
+                    angle = 324 + Math.min(((aqi - 300) / 200) * 36, 36);
+                }
+                
+                needle.style.transition = 'transform 1s ease-in-out';
+                needle.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+            }
+
+            updatePollutants(aqi) {
+                const pollutantCards = document.querySelectorAll('.pollutant-card');
+                
+                pollutantCards.forEach(card => {
+                    const valueElement = card.querySelector('.pollutant-value');
+                    const statusElement = card.querySelector('.pollutant-status');
+                    
+                    if (aqi === 0) {
+                        valueElement.textContent = '0';
+                        statusElement.textContent = 'No Data';
+                        statusElement.className = 'pollutant-status';
+                    } else {
+                        const baseValue = aqi * 0.8;
+                        const variation = 0.7 + (Math.random() * 0.6);
+                        const pollutantValue = Math.round(baseValue * variation);
+                        
+                        valueElement.textContent = pollutantValue;
+                        
+                        const aqiInfo = this.getAQIInfo(aqi);
+                        statusElement.textContent = aqiInfo.label;
+                        statusElement.className = `pollutant-status ${aqiInfo.level}`;
+                    }
+                });
+            }
+
+            getAQIInfo(aqi) {
+                if (aqi <= 50) {
+                    return { label: 'Good', level: 'good', color: 'linear-gradient(135deg, #22c55e, #16a34a)' };
+                } else if (aqi <= 100) {
+                    return { label: 'Moderate', level: 'moderate', color: 'linear-gradient(135deg, #eab308, #ca8a04)' };
+                } else if (aqi <= 150) {
+                    return { label: 'Unhealthy for Sensitive', level: 'unhealthy-sensitive', color: 'linear-gradient(135deg, #fb923c, #ea580c)' };
+                } else if (aqi <= 200) {
+                    return { label: 'Unhealthy', level: 'unhealthy', color: 'linear-gradient(135deg, #ef4444, #dc2626)' };
+                } else if (aqi <= 300) {
+                    return { label: 'Very Unhealthy', level: 'very-unhealthy', color: 'linear-gradient(135deg, #a855f7, #9333ea)' };
+                } else {
+                    return { label: 'Hazardous', level: 'hazardous', color: 'linear-gradient(135deg, #7f1d1d, #991b1b)' };
+                }
+            }
+
+            initForecastChart() {
+                const ctx = document.getElementById('forecastChart').getContext('2d');
+                
+                this.forecastChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Hour 1', 'Hour 2', 'Hour 3', 'Hour 4', 'Hour 5', 'Hour 6'],
+                        datasets: [{
+                            label: 'AQI Forecast',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 300
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateForecastChart() {
+                if (!this.forecastChart) return;
+                
+                const forecastData = this.generateSyntheticData(6);
+                this.forecastChart.data.labels = forecastData.labels;
+                this.forecastChart.data.datasets[0].data = forecastData.values;
+                this.forecastChart.update();
+            }
+
+            updateForecastRange(hours) {
+                if (!this.forecastChart) return;
+                
+                const forecastData = this.generateSyntheticData(hours);
+                this.forecastChart.data.labels = forecastData.labels;
+                this.forecastChart.data.datasets[0].data = forecastData.values;
+                this.forecastChart.update();
+            }
+
+            generateSyntheticData(hours) {
+                const labels = [];
+                const values = [];
+                const now = new Date();
+                
+                for (let i = 0; i < hours; i++) {
+                    const hour = new Date(now.getTime() + (i * 60 * 60 * 1000));
+                    labels.push(hour.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+                    
+                    if (this.currentAQI === 0) {
+                        values.push(0);
+                    } else {
+                        const variation = 0.8 + (Math.random() * 0.4);
+                        const value = Math.round(this.currentAQI * variation);
+                        values.push(Math.max(20, Math.min(300, value)));
+                    }
+                }
+                
+                return { labels, values };
+            }
+
+            showNotification(message, type = 'info') {
+                this.updateDebug(`Notification: ${message} (${type})`);
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.debugAQI = new DebugAQIPredictor();
+        });
+    </script>
+</body>
+</html>

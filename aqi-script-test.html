@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AQI Script Functionality Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .warning { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 AQI Script Functionality Test</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Testing AQI Script Components</h3>
+        <p>This page tests if the AQI script is working correctly with all components.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>🌐 Component Tests</h3>
+        <button onclick="testAllComponents()">Run All Tests</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Manual Test Steps</h3>
+        <ol>
+            <li><strong>Open Main Website:</strong> <a href="/aqi-predictor.html" target="_blank">AQI Predictor</a></li>
+            <li><strong>Test Location Input:</strong> Type "CBD Belapur"</li>
+            <li><strong>Check AQI Display:</strong> Should show ~104</li>
+            <li><strong>Check Parameters:</strong> All should show real values (not 0)</li>
+            <li><strong>Test Other Cities:</strong> Try "Vashi" (~109) and "Sanpada" (~78)</li>
+            <li><strong>Check Gauge:</strong> Should point to correct AQI level</li>
+            <li><strong>Check Forecast:</strong> Graph should load with data</li>
+        </ol>
+    </div>
+
+    <script>
+        async function testAllComponents() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<p>Running tests...</p>';
+            
+            let testResults = [];
+            
+            // Test 1: API Server
+            try {
+                const response = await fetch('http://localhost:5004/current-aqi/cbd%20belapur');
+                const data = await response.json();
+                
+                if (data.success && data.data.aqi) {
+                    testResults.push({
+                        name: 'API Server',
+                        status: 'success',
+                        message: `✅ Working - AQI: ${data.data.aqi}`
+                    });
+                } else {
+                    testResults.push({
+                        name: 'API Server',
+                        status: 'error',
+                        message: '❌ API not returning valid data'
+                    });
+                }
+            } catch (error) {
+                testResults.push({
+                    name: 'API Server',
+                    status: 'error',
+                    message: `❌ Network error: ${error.message}`
+                });
+            }
+            
+            // Test 2: Main Website Loading
+            try {
+                const response = await fetch('/aqi-predictor.html');
+                if (response.ok) {
+                    const text = await response.text();
+                    
+                    if (text.includes('aqi-script-fixed.js')) {
+                        testResults.push({
+                            name: 'JavaScript File',
+                            status: 'success',
+                            message: '✅ Using fixed JavaScript file'
+                        });
+                    } else {
+                        testResults.push({
+                            name: 'JavaScript File',
+                            status: 'warning',
+                            message: '⚠️ May not be using fixed JavaScript'
+                        });
+                    }
+                    
+                    if (text.includes('localhost:5004')) {
+                        testResults.push({
+                            name: 'API Configuration',
+                            status: 'success',
+                            message: '✅ API endpoint configured correctly'
+                        });
+                    } else {
+                        testResults.push({
+                            name: 'API Configuration',
+                            status: 'warning',
+                            message: '⚠️ API endpoint may not be configured'
+                        });
+                    }
+                } else {
+                    testResults.push({
+                        name: 'Main Website',
+                        status: 'error',
+                        message: `❌ Website not loading: ${response.status}`
+                    });
+                }
+            } catch (error) {
+                testResults.push({
+                    name: 'Main Website',
+                    status: 'error',
+                    message: `❌ Website error: ${error.message}`
+                });
+            }
+            
+            // Test 3: Different Cities Data
+            const cities = ['cbd belapur', 'vashi', 'sanpada'];
+            let cityTests = [];
+            
+            for (const city of cities) {
+                try {
+                    const response = await fetch(`http://localhost:5004/current-aqi/${city}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data.aqi) {
+                        cityTests.push(`${city.title()}: ${data.data.aqi}`);
+                    }
+                } catch (error) {
+                    cityTests.push(`${city.title()}: Error`);
+                }
+            }
+            
+            if (cityTests.length === 3) {
+                testResults.push({
+                    name: 'City Data',
+                    status: 'success',
+                    message: `✅ All cities working: ${cityTests.join(', ')}`
+                });
+            } else {
+                testResults.push({
+                    name: 'City Data',
+                    status: 'warning',
+                    message: `⚠️ Some cities not working: ${cityTests.join(', ')}`
+                });
+            }
+            
+            // Display results
+            let html = '';
+            testResults.forEach(test => {
+                const className = test.status === 'success' ? 'success' : 
+                                 test.status === 'warning' ? 'warning' : 'error';
+                html += `<div class="result ${className}"><strong>${test.name}:</strong> ${test.message}</div>`;
+            });
+            
+            results.innerHTML = html;
+        }
+        
+        // Auto-test on load
+        testAllComponents();
+    </script>
+</body>
+</html>

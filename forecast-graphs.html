@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Forecast Graphs - 6 & 12 Hours</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .graphs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .graph-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .graph-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .graph-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #333;
+            text-align: center;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+        
+        .city-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .city-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .city-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .city-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .city-btn:not(.active) {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .city-btn:hover:not(.active) {
+            background: #e0e0e0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .graphs-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .city-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌫️ AQI Forecast Graphs</h1>
+            <p class="subtitle">6-Hour and 12-Hour Predictions for Mumbai Locations</p>
+        </header>
+        
+        <div class="city-selector">
+            <h3>Select Location:</h3>
+            <div class="forecast-controls">
+                <button class="forecast-btn active" data-range="6">After 6 Hours</button>
+                <button class="forecast-btn" data-range="12">After 12 Hours</button>
+            </div>
+            <div class="city-buttons">
+                <button class="city-btn active" data-city="CBD Belapur">CBD Belapur</button>
+                <button class="city-btn" data-city="Vashi">Vashi</button>
+                <button class="city-btn" data-city="Sanpada">Sanpada</button>
+            </div>
+        </div>
+        
+        <div class="graphs-grid">
+            <div class="graph-card">
+                <h3 class="graph-title">📊 6-Hour AQI Forecast</h3>
+                <div class="chart-container">
+                    <canvas id="chart6hr"></canvas>
+                </div>
+                <div class="stats-grid" id="stats6hr">
+                    <div class="stat-item">
+                        <div class="stat-label">Current AQI</div>
+                        <div class="stat-value" id="current6hr">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Average</div>
+                        <div class="stat-value" id="avg6hr">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Range</div>
+                        <div class="stat-value" id="range6hr">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Trend</div>
+                        <div class="stat-value" id="trend6hr">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="graph-card">
+                <h3 class="graph-title">📈 12-Hour AQI Forecast</h3>
+                <div class="chart-container">
+                    <canvas id="chart12hr"></canvas>
+                </div>
+                <div class="stats-grid" id="stats12hr">
+                    <div class="stat-item">
+                        <div class="stat-label">Current AQI</div>
+                        <div class="stat-value" id="current12hr">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Average</div>
+                        <div class="stat-value" id="avg12hr">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Range</div>
+                        <div class="stat-value" id="range12hr">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Peak Time</div>
+                        <div class="stat-value" id="peak12hr">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FF6B6B;"></div>
+                <span>Historical Data</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4ECDC4;"></div>
+                <span>Forecast</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFD93D;"></div>
+                <span>Current Time</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Forecast data based on the ML model predictions
+        const forecastData = {
+            'CBD Belapur': {
+                current: 125,
+                historical: [122, 124, 123, 125, 127, 126, 125, 124, 126, 128, 127, 125],
+                forecast6hr: [126, 128, 130, 129, 127, 125],
+                forecast12hr: [126, 128, 130, 129, 127, 125, 124, 126, 128, 130, 132, 131]
+            },
+            'Vashi': {
+                current: 138,
+                historical: [135, 137, 136, 138, 140, 139, 138, 137, 139, 141, 140, 138],
+                forecast6hr: [139, 141, 143, 142, 140, 138],
+                forecast12hr: [139, 141, 143, 142, 140, 138, 137, 139, 141, 143, 145, 144]
+            },
+            'Sanpada': {
+                current: 97,
+                historical: [95, 96, 96, 97, 98, 98, 97, 96, 98, 99, 98, 97],
+                forecast6hr: [98, 100, 101, 99, 97, 95],
+                forecast12hr: [98, 100, 101, 99, 97, 95, 94, 93, 94, 96, 98, 100]
+            }
+        };
+        
+        let currentCity = 'CBD Belapur';
+        let chart6hr = null;
+        let chart12hr = null;
+        
+        // Initialize charts
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'AQI Value'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                }
+            };
+            
+            // 6-hour chart
+            const ctx6hr = document.getElementById('chart6hr').getContext('2d');
+            chart6hr = new Chart(ctx6hr, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: chartOptions
+            });
+            
+            // 12-hour chart
+            const ctx12hr = document.getElementById('chart12hr').getContext('2d');
+            chart12hr = new Chart(ctx12hr, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: chartOptions
+            });
+            
+            updateCharts();
+        }
+        
+        // Update charts with selected city data
+        function updateCharts() {
+            const data = forecastData[currentCity];
+            const now = new Date();
+            
+            // Generate time labels
+            const historicalLabels = [];
+            const forecast6hrLabels = [];
+            const forecast12hrLabels = [];
+            
+            // Historical labels (last 12 hours)
+            for (let i = 11; i >= 0; i--) {
+                const time = new Date(now - i * 60 * 60 * 1000);
+                historicalLabels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+            }
+            
+            // 6-hour forecast labels
+            for (let i = 1; i <= 6; i++) {
+                const time = new Date(now + i * 60 * 60 * 1000);
+                forecast6hrLabels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+            }
+            
+            // 12-hour forecast labels
+            for (let i = 1; i <= 12; i++) {
+                const time = new Date(now + i * 60 * 60 * 1000);
+                forecast12hrLabels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+            }
+            
+            // Update 6-hour chart
+            chart6hr.data.labels = [...historicalLabels.slice(-6), ...forecast6hrLabels];
+            chart6hr.data.datasets = [
+                {
+                    label: 'Historical',
+                    data: [...data.historical.slice(-6), ...Array(6).fill(null)],
+                    borderColor: '#FF6B6B',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: '6-Hour Forecast',
+                    data: [...Array(6).fill(null), ...data.forecast6hr],
+                    borderColor: '#4ECDC4',
+                    backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Current Time',
+                    data: [...Array(6).fill(null), data.current, ...Array(5).fill(null)],
+                    borderColor: '#FFD93D',
+                    backgroundColor: '#FFD93D',
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    showLine: false
+                }
+            ];
+            chart6hr.update();
+            
+            // Update 12-hour chart
+            chart12hr.data.labels = [...historicalLabels, ...forecast12hrLabels];
+            chart12hr.data.datasets = [
+                {
+                    label: 'Historical',
+                    data: [...data.historical, ...Array(12).fill(null)],
+                    borderColor: '#FF6B6B',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: '12-Hour Forecast',
+                    data: [...Array(12).fill(null), ...data.forecast12hr],
+                    borderColor: '#4ECDC4',
+                    backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Current Time',
+                    data: [...Array(12).fill(null), data.current, ...Array(11).fill(null)],
+                    borderColor: '#FFD93D',
+                    backgroundColor: '#FFD93D',
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    showLine: false
+                }
+            ];
+            chart12hr.update();
+            
+            // Update statistics
+            updateStatistics(data);
+        }
+        
+        // Update statistics
+        function updateStatistics(data) {
+            // 6-hour stats
+            const avg6hr = (data.forecast6hr.reduce((a, b) => a + b, 0) / data.forecast6hr.length).toFixed(1);
+            const range6hr = `${Math.min(...data.forecast6hr)} - ${Math.max(...data.forecast6hr)}`;
+            const trend6hr = data.forecast6hr[5] > data.forecast6hr[0] ? '📈 Rising' : '📉 Falling';
+            
+            document.getElementById('current6hr').textContent = data.current;
+            document.getElementById('avg6hr').textContent = avg6hr;
+            document.getElementById('range6hr').textContent = range6hr;
+            document.getElementById('trend6hr').textContent = trend6hr;
+            
+            // 12-hour stats
+            const avg12hr = (data.forecast12hr.reduce((a, b) => a + b, 0) / data.forecast12hr.length).toFixed(1);
+            const range12hr = `${Math.min(...data.forecast12hr)} - ${Math.max(...data.forecast12hr)}`;
+            const peakIndex = data.forecast12hr.indexOf(Math.max(...data.forecast12hr));
+            const peakTime = new Date(Date.now() + (peakIndex + 1) * 60 * 60 * 1000);
+            const peakHour = peakTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('current12hr').textContent = data.current;
+            document.getElementById('avg12hr').textContent = avg12hr;
+            document.getElementById('range12hr').textContent = range12hr;
+            document.getElementById('peak12hr').textContent = peakHour;
+        }
+        
+        // City selector event listeners
+        document.querySelectorAll('.city-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentCity = this.dataset.city;
+                updateCharts();
+            });
+        });
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initCharts);
+        
+        // Auto-refresh every 5 minutes
+        setInterval(updateCharts, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

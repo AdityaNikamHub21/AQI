@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Test</title>
+</head>
+<body>
+    <h1>Real-Time AQI Test</h1>
+    <button onclick="testRealTime()">Test Real-Time API</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testRealTime() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5001/current-aqi/cbd%20belapur');
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <h3>✅ Real-Time Data Working!</h3>
+                        <p><strong>Location:</strong> ${data.data.location}</p>
+                        <p><strong>AQI:</strong> ${data.data.aqi}</p>
+                        <p><strong>PM2.5:</strong> ${data.data.pm25}</p>
+                        <p><strong>PM10:</strong> ${data.data.pm10}</p>
+                        <p><strong>Timestamp:</strong> ${data.data.timestamp}</p>
+                        <p><strong>Status:</strong> <span style="color: green">REAL-TIME UPDATING!</span></p>
+                    `;
+                } else {
+                    result.innerHTML = `<p>❌ Error: ${data.message}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p>❌ Network Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Auto-test every 5 seconds
+        setInterval(testRealTime, 5000);
+        
+        // Test immediately
+        testRealTime();
+    </script>
+</body>
+</html>

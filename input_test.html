@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Test</title>
+</head>
+<body>
+    <h1>Input Test</h1>
+    <input type="text" id="testInput" placeholder="Type here...">
+    <button onclick="testInput()">Test Input</button>
+    <div id="result"></div>
+    
+    <script>
+        function testInput() {
+            const input = document.getElementById('testInput');
+            const result = document.getElementById('result');
+            result.textContent = 'You typed: ' + input.value;
+            console.log('Input value:', input.value);
+        }
+        
+        // Test on Enter key
+        document.getElementById('testInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                testInput();
+            }
+        });
+        
+        // Test on input
+        document.getElementById('testInput').addEventListener('input', function(e) {
+            console.log('Input changed:', e.target.value);
+        });
+    </script>
+</body>
+</html>
