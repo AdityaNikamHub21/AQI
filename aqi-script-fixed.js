@@ -165,42 +165,40 @@ class AQIPredictor {
             'PM10': data.pm10 || 0,
             'O₃': data.o3 || 0,
             'NO₂': data.no2 || 0,
-            'NO': data.no || 0,
             'SO₂': data.so2 || 0,
             'CO': data.co || 0,
+            'NO': data.no || 0,
             '💨': data.wind_speed || 0,
             '💧': data.humidity || 0
         };
 
-        const pollutants = ['PM2.5', 'PM10', 'O₃', 'NO₂', 'NO', 'SO₂', 'CO', '💨', '💧'];
+        const pollutants = ['PM2.5', 'PM10', 'O₃', 'NO₂', 'SO₂', 'CO', 'NO', '💨', '💧'];
         
         pollutantCards.forEach((card, index) => {
-            const pollutant = pollutants[index];
-            const value = pollutantValues[pollutant];
-            
-            // Handle different display formats
-            let displayValue;
-            if (pollutant === 'CO') {
-                displayValue = value > 0 ? value.toFixed(1) : '0';
-            } else {
-                displayValue = value > 0 ? Math.round(value) : '0';
-            }
-            
-            card.querySelector('.pollutant-value').textContent = displayValue;
-            
-            // Update status based on value
-            const statusElement = card.querySelector('.pollutant-status');
-            if (pollutant === '💨') {
-                if (value <= 5) {
-                    statusElement.textContent = 'Low';
-                    statusElement.className = 'pollutant-status good';
-                } else if (value <= 15) {
-                    statusElement.textContent = 'Moderate';
-                    statusElement.className = 'pollutant-status moderate';
-                } else {
-                    statusElement.textContent = 'High';
-                    statusElement.className = 'pollutant-status high';
+            if (index < pollutants.length) {
+                const pollutant = pollutants[index];
+                const value = pollutantValues[pollutant];
+                const valueElement = card.querySelector('.pollutant-value');
+                const statusElement = card.querySelector('.pollutant-status');
+                
+                if (valueElement) {
+                    let displayValue;
+                    if (pollutant === 'CO') {
+                        displayValue = value > 0 ? value.toFixed(1) : '0';
+                    } else if (pollutant === '💨') {
+                        displayValue = value > 0 ? value.toFixed(1) : '0';
+                    } else if (pollutant === '💧') {
+                        displayValue = value > 0 ? value.toFixed(0) : '0';
+                    } else {
+                        displayValue = value > 0 ? Math.round(value) : '0';
+                    }
+                    valueElement.textContent = displayValue;
                 }
+                
+                if (statusElement) {
+                    const aqiInfo = this.getAQIInfo(data.aqi);
+                    statusElement.textContent = aqiInfo.label;
+                    statusElement.className = `pollutant-status ${aqiInfo.level}`;
             } else if (pollutant === '💧') {
                 if (value <= 30) {
                     statusElement.textContent = 'Low';
@@ -337,6 +335,87 @@ class AQIPredictor {
         });
     }
 
+    updateHealthRisks(data) {
+        // Calculate health risks for 3 personas based on current AQI
+        const aqi = data.aqi;
+        
+        // Determine base risk level
+        let baseRisk;
+        if (aqi <= 50) baseRisk = 'low';
+        else if (aqi <= 100) baseRisk = 'moderate';
+        else if (aqi <= 150) baseRisk = 'high';
+        else baseRisk = 'hazardous';
+        
+        // Update each persona with risk level and advice
+        const personas = {
+            children: {
+                element: 'childrenRisk',
+                advice: 'childrenAdvice',
+                sensitivity: 1.5
+            },
+            workers: {
+                element: 'workersRisk',
+                advice: 'workersAdvice',
+                sensitivity: 1.2
+            },
+            general: {
+                element: 'generalRisk',
+                advice: 'generalAdvice',
+                sensitivity: 1.0
+            }
+        };
+        
+        for (const [key, persona] of Object.entries(personas)) {
+            const riskElement = document.getElementById(persona.element);
+            const adviceElement = document.getElementById(persona.advice);
+            
+            if (riskElement && adviceElement) {
+                // Calculate elevated risk based on persona sensitivity
+                const elevatedRisk = this.getElevatedRisk(baseRisk, persona.sensitivity);
+                
+                // Update risk level
+                riskElement.textContent = elevatedRisk.charAt(0).toUpperCase() + elevatedRisk.slice(1);
+                riskElement.className = `risk-level ${elevatedRisk}`;
+                
+                // Update advice
+                adviceElement.textContent = this.getHealthAdvice(elevatedRisk, key);
+            }
+        }
+    }
+    
+    getElevatedRisk(baseRisk, sensitivity) {
+        const riskLevels = ['low', 'moderate', 'high', 'hazardous'];
+        const baseIndex = riskLevels.indexOf(baseRisk);
+        const elevatedIndex = Math.min(baseIndex + Math.floor(sensitivity - 1), riskLevels.length - 1);
+        return riskLevels[elevatedIndex];
+    }
+    
+    getHealthAdvice(riskLevel, persona) {
+        const advice = {
+            low: {
+                children: 'Safe for outdoor activities',
+                workers: 'Normal working conditions',
+                general: 'Enjoy normal activities'
+            },
+            moderate: {
+                children: 'Reduce prolonged outdoor play',
+                workers: 'Monitor health during work',
+                general: 'Sensitive people take care'
+            },
+            high: {
+                children: 'Avoid prolonged outdoor exertion',
+                workers: 'Reduce prolonged outdoor work',
+                general: 'Avoid prolonged outdoor exertion'
+            },
+            hazardous: {
+                children: 'Remain indoors',
+                workers: 'Avoid outdoor work',
+                general: 'Avoid all outdoor activities'
+            }
+        };
+        return advice[riskLevel][persona];
+    }
+    
     updateAnalysis(aqi) {
         const trendElement = document.getElementById('trendAnalysis');
         const riskElement = document.getElementById('riskAnalysis');

@@ -751,3 +751,209 @@ body {
         align-items: center;
     }
 }
+
+/* Health Risk Analysis Styles */
+.health-risk {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.risk-personas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.persona-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    border-top: 5px solid #667eea;
+}
+
+.persona-card:hover {
+    transform: translateY(-5px);
+}
+
+.persona-card.children {
+    border-top-color: #dc3545;
+}
+
+.persona-card.workers {
+    border-top-color: #fd7e14;
+}
+
+.persona-card.general {
+    border-top-color: #28a745;
+}
+
+.persona-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.persona-card h3 {
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.risk-level {
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.risk-level.low {
+    background: #28a745;
+}
+
+.risk-level.moderate {
+    background: #ffc107;
+}
+
+.risk-level.high {
+    background: #fd7e14;
+}
+
+.risk-level.hazardous {
+    background: #dc3545;
+}
+
+.risk-advice {
+    font-size: 0.95em;
+    line-height: 1.5;
+    color: #495057;
+    font-style: italic;
+}
+
+/* Forecast Health Risk Indicator Styles */
+.forecast-risk-indicator {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.risk-summary {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+.risk-timeline h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.risk-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.risk-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.risk-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9em;
+}
+
+.risk-value {
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 15px;
+    color: white;
+    font-size: 0.9em;
+}
+
+.risk-value.low {
+    background: #28a745;
+}
+
+.risk-value.moderate {
+    background: #ffc107;
+}
+
+.risk-value.high {
+    background: #fd7e14;
+}
+
+.risk-value.hazardous {
+    background: #dc3545;
+}
+
+.hourly-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.hourly-risk-item {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    transition: transform 0.2s ease;
+}
+
+.hourly-risk-item:hover {
+    transform: translateY(-2px);
+}
+
+.hourly-risk-item.low {
+    border-left-color: #28a745;
+}
+
+.hourly-risk-item.moderate {
+    border-left-color: #ffc107;
+}
+
+.hourly-risk-item.high {
+    border-left-color: #fd7e14;
+}
+
+.hourly-risk-item.hazardous {
+    border-left-color: #dc3545;
+}
+
+.hourly-risk-hour {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.hourly-risk-persona {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.hourly-risk-risk {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.hourly-risk-advice {
+    font-size: 0.8em;
+    color: #495057;
+    line-height: 1.4;
+}

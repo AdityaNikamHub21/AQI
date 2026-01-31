@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .input-test { margin: 20px 0; }
+        input { padding: 10px; font-size: 16px; border: 2px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; margin-left: 10px; }
+        .result { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Input Field Test</h1>
+    
+    <div class="input-test">
+        <input type="text" id="testInput" placeholder="Type here..." value="">
+        <button onclick="testInput()">Test Input</button>
+    </div>
+    
+    <div id="result" class="result">Type something and click test...</div>
+    
+    <script>
+        // Test basic input functionality
+        document.getElementById('testInput').addEventListener('input', function(e) {
+            document.getElementById('result').textContent = 'You typed: ' + e.target.value;
+        });
+        
+        document.getElementById('testInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('result').textContent = 'Enter pressed! Value: ' + e.target.value;
+            }
+        });
+        
+        function testInput() {
+            const value = document.getElementById('testInput').value;
+            document.getElementById('result').textContent = 'Button clicked! Value: ' + value;
+        }
+        
+        // Test if input field is focusable
+        document.getElementById('testInput').focus();
+    </script>
+</body>
+</html>

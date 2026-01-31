@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Health Risk Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .location-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .location-btn {
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .location-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .location-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .current-aqi {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .aqi-value {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .aqi-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .aqi-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .aqi-detail .label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .aqi-detail .value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .health-risks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .persona-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid #667eea;
+        }
+
+        .persona-card.children {
+            border-top-color: #dc3545;
+        }
+
+        .persona-card.workers {
+            border-top-color: #fd7e14;
+        }
+
+        .persona-card.general {
+            border-top-color: #28a745;
+        }
+
+        .persona-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .persona-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+        }
+
+        .persona-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .risk-scenarios {
+            margin-top: 20px;
+        }
+
+        .risk-scenario {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .risk-scenario.low {
+            border-left-color: #28a745;
+        }
+
+        .risk-scenario.moderate {
+            border-left-color: #ffc107;
+        }
+
+        .risk-scenario.high {
+            border-left-color: #fd7e14;
+        }
+
+        .risk-scenario.hazardous {
+            border-left-color: #dc3545;
+        }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .exposure-time {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .risk-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .risk-badge.low {
+            background: #28a745;
+        }
+
+        .risk-badge.moderate {
+            background: #ffc107;
+        }
+
+        .risk-badge.high {
+            background: #fd7e14;
+        }
+
+        .risk-badge.hazardous {
+            background: #dc3545;
+        }
+
+        .confidence {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .health-advice {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #495057;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .health-risks {
+                grid-template-columns: 1fr;
+            }
+            
+            .location-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .aqi-value {
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 AQI Health Risk Analysis</h1>
+            <p>Personalized health risk assessment based on current air quality</p>
+        </header>
+
+        <main class="main-content">
+            <div class="location-selector">
+                <button class="location-btn active" onclick="selectLocation('cbd belapur')">CBD Belapur</button>
+                <button class="location-btn" onclick="selectLocation('vashi')">Vashi</button>
+                <button class="location-btn" onclick="selectLocation('sanpada')">Sanpada</button>
+            </div>
+
+            <div id="loadingDiv" class="loading" style="display: none;">
+                <div>🔄 Analyzing health risks...</div>
+            </div>
+
+            <div id="errorDiv" class="error" style="display: none;"></div>
+
+            <div id="contentDiv">
+                <div class="current-aqi">
+                    <div class="aqi-value" id="aqiValue">--</div>
+                    <div>Current AQI</div>
+                    <div class="aqi-details" id="aqiDetails">
+                        <div class="aqi-detail">
+                            <div class="label">PM2.5</div>
+                            <div class="value" id="pm25Value">--</div>
+                        </div>
+                        <div class="aqi-detail">
+                            <div class="label">PM10</div>
+                            <div class="value" id="pm10Value">--</div>
+                        </div>
+                        <div class="aqi-detail">
+                            <div class="label">Temperature</div>
+                            <div class="value" id="tempValue">--</div>
+                        </div>
+                        <div class="aqi-detail">
+                            <div class="label">Humidity</div>
+                            <div class="value" id="humidityValue">--</div>
+                        </div>
+                        <div class="aqi-detail">
+                            <div class="label">Wind Speed</div>
+                            <div class="value" id="windValue">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="health-risks" id="healthRisks">
+                    <!-- Persona cards will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentLocation = 'cbd belapur';
+
+        // Initialize with CBD Belapur
+        window.onload = () => {
+            loadHealthRisks('cbd belapur');
+        };
+
+        function selectLocation(location) {
+            // Update button states
+            document.querySelectorAll('.location-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Load health risks for selected location
+            loadHealthRisks(location);
+        }
+
+        async function loadHealthRisks(location) {
+            const loadingDiv = document.getElementById('loadingDiv');
+            const errorDiv = document.getElementById('errorDiv');
+            const contentDiv = document.getElementById('contentDiv');
+
+            // Show loading
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            contentDiv.style.display = 'none';
+
+            try {
+                // Get current AQI data
+                const aqiResponse = await fetch(`http://localhost:5004/current-aqi/${location}`);
+                const aqiData = await aqiResponse.json();
+
+                if (!aqiData.success) {
+                    throw new Error('Failed to fetch AQI data');
+                }
+
+                // Update AQI display
+                updateAQIDisplay(aqiData.data);
+
+                // Generate health risk analysis
+                const healthRisks = generateHealthRisks(aqiData.data);
+
+                // Display health risks
+                displayHealthRisks(healthRisks);
+
+                // Show content
+                contentDiv.style.display = 'block';
+
+            } catch (error) {
+                errorDiv.textContent = `❌ Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        function updateAQIDisplay(aqiData) {
+            document.getElementById('aqiValue').textContent = Math.round(aqiData.aqi);
+            document.getElementById('pm25Value').textContent = `${aqiData.pm25} µg/m³`;
+            document.getElementById('pm10Value').textContent = `${aqiData.pm10} µg/m³`;
+            document.getElementById('tempValue').textContent = `${aqiData.temperature || 25}°C`;
+            document.getElementById('humidityValue').textContent = `${aqiData.humidity || 60}%`;
+            document.getElementById('windValue').textContent = `${aqiData.wind_speed || 5} km/h`;
+        }
+
+        function generateHealthRisks(aqiData) {
+            // Simulate health risk analysis (in real implementation, this would call the AI model)
+            const baseRisk = aqiData.aqi > 100 ? 'hazardous' : aqiData.aqi > 75 ? 'high' : aqiData.aqi > 50 ? 'moderate' : 'low';
+            
+            const personas = {
+                'children_elderly': {
+                    name: 'Children / Elderly',
+                    icon: '👶👴',
+                    class: 'children',
+                    sensitivity: 1.5,
+                    scenarios: [
+                        { hours: 2, risk: getElevatedRisk(baseRisk, 1.5) },
+                        { hours: 4, risk: getElevatedRisk(baseRisk, 1.8) },
+                        { hours: 6, risk: getElevatedRisk(baseRisk, 2.0) }
+                    ]
+                },
+                'outdoor_workers': {
+                    name: 'Outdoor Workers / Athletes',
+                    icon: '👷🏃',
+                    class: 'workers',
+                    sensitivity: 1.2,
+                    scenarios: [
+                        { hours: 4, risk: getElevatedRisk(baseRisk, 1.3) },
+                        { hours: 6, risk: getElevatedRisk(baseRisk, 1.5) },
+                        { hours: 8, risk: getElevatedRisk(baseRisk, 1.7) }
+                    ]
+                },
+                'general_public': {
+                    name: 'General Public',
+                    icon: '👥',
+                    class: 'general',
+                    sensitivity: 1.0,
+                    scenarios: [
+                        { hours: 1, risk: baseRisk },
+                        { hours: 3, risk: getElevatedRisk(baseRisk, 1.1) },
+                        { hours: 6, risk: getElevatedRisk(baseRisk, 1.3) }
+                    ]
+                }
+            };
+
+            // Add health advice based on risk level
+            Object.keys(personas).forEach(personaKey => {
+                personas[personaKey].scenarios.forEach(scenario => {
+                    scenario.advice = getHealthAdvice(scenario.risk, personaKey);
+                    scenario.confidence = getConfidence(scenario.risk, aqiData.aqi);
+                });
+            });
+
+            return personas;
+        }
+
+        function getElevatedRisk(baseRisk, multiplier) {
+            const riskLevels = ['low', 'moderate', 'high', 'hazardous'];
+            const baseIndex = riskLevels.indexOf(baseRisk);
+            const elevatedIndex = Math.min(baseIndex + Math.floor(multiplier - 1), riskLevels.length - 1);
+            return riskLevels[elevatedIndex];
+        }
+
+        function getHealthAdvice(riskLevel, persona) {
+            const advice = {
+                'low': {
+                    'children_elderly': 'Air quality is safe for outdoor activities. Children and elderly can enjoy normal outdoor play and exercise.',
+                    'outdoor_workers': 'Working conditions are safe. No special precautions needed for outdoor work.',
+                    'general_public': 'Air quality is good. Enjoy your normal outdoor activities!'
+                },
+                'moderate': {
+                    'children_elderly': 'Children and elderly may consider reducing prolonged outdoor exertion. Take breaks during outdoor activities.',
+                    'outdoor_workers': 'Monitor your health during long outdoor shifts. Consider more frequent breaks in shaded areas.',
+                    'general_public': 'Unusually sensitive people should consider reducing prolonged outdoor exertion.'
+                },
+                'high': {
+                    'children_elderly': 'Children and elderly should avoid prolonged outdoor exertion. Keep outdoor activities short and take frequent breaks.',
+                    'outdoor_workers': 'Reduce prolonged outdoor work. Use protective masks if available and monitor for health symptoms.',
+                    'general_public': 'Avoid prolonged outdoor exertion. Sensitive groups should stay indoors as much as possible.'
+                },
+                'hazardous': {
+                    'children_elderly': 'Children and elderly should remain indoors. Keep all outdoor activities to an absolute minimum.',
+                    'outdoor_workers': 'Avoid outdoor work if possible. If unavoidable, use proper respiratory protection and limit exposure time.',
+                    'general_public': 'Avoid all outdoor activities. Stay indoors and keep windows closed. Use air purifiers if available.'
+                }
+            };
+            return advice[riskLevel][persona];
+        }
+
+        function getConfidence(riskLevel, aqi) {
+            // Higher confidence for more extreme AQI values
+            if (aqi > 150) return 85 + Math.random() * 10;
+            if (aqi > 100) return 75 + Math.random() * 15;
+            if (aqi > 50) return 65 + Math.random() * 20;
+            return 55 + Math.random() * 25;
+        }
+
+        function displayHealthRisks(healthRisks) {
+            const container = document.getElementById('healthRisks');
+            container.innerHTML = '';
+
+            Object.keys(healthRisks).forEach(personaKey => {
+                const persona = healthRisks[personaKey];
+                
+                const card = document.createElement('div');
+                card.className = `persona-card ${persona.class}`;
+                
+                card.innerHTML = `
+                    <div class="persona-header">
+                        <div class="persona-icon">${persona.icon}</div>
+                        <div class="persona-title">${persona.name}</div>
+                    </div>
+                    <div class="risk-scenarios">
+                        ${persona.scenarios.map(scenario => `
+                            <div class="risk-scenario ${scenario.risk}">
+                                <div class="scenario-header">
+                                    <div class="exposure-time">🕐 ${scenario.hours} hours outdoors</div>
+                                    <div class="risk-badge ${scenario.risk}">${scenario.risk.toUpperCase()}</div>
+                                </div>
+                                <div class="confidence">Confidence: ${scenario.confidence.toFixed(1)}%</div>
+                                <div class="health-advice">${scenario.advice}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

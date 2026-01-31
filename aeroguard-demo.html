@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroGuard: Hyper-Local Air Quality & Health Risk Forecaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .input-group h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .persona-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .persona-option {
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .persona-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .persona-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .persona-option .icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .predict-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .risk-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .risk-card.low {
+            border-left-color: #28a745;
+        }
+
+        .risk-card.moderate {
+            border-left-color: #ffc107;
+        }
+
+        .risk-card.high {
+            border-left-color: #fd7e14;
+        }
+
+        .risk-card.hazardous {
+            border-left-color: #dc3545;
+        }
+
+        .risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .risk-level {
+            font-size: 2em;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .risk-level.low {
+            background: #28a745;
+        }
+
+        .risk-level.moderate {
+            background: #ffc107;
+        }
+
+        .risk-level.high {
+            background: #fd7e14;
+        }
+
+        .risk-level.hazardous {
+            background: #dc3545;
+        }
+
+        .confidence {
+            font-size: 1.1em;
+            color: #6c757d;
+        }
+
+        .health-advice {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .health-advice h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .risk-factors {
+            margin-top: 20px;
+        }
+
+        .risk-factors h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .factor-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .factor-name {
+            font-weight: 600;
+        }
+
+        .factor-value {
+            color: #6c757d;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .persona-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ AeroGuard</h1>
+            <p>Hyper-Local Air Quality & Health Risk Forecaster</p>
+        </header>
+
+        <main class="main-content">
+            <section class="input-section">
+                <div class="input-group">
+                    <h3>🌤️ Environmental Conditions</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="aqi">AQI</label>
+                            <input type="number" id="aqi" value="100" min="0" max="500">
+                        </div>
+                        <div class="form-group">
+                            <label for="pm25">PM2.5 (µg/m³)</label>
+                            <input type="number" id="pm25" value="50" min="0" max="500">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pm10">PM10 (µg/m³)</label>
+                            <input type="number" id="pm10" value="75" min="0" max="500">
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" value="25" min="-10" max="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="humidity">Humidity (%)</label>
+                            <input type="number" id="humidity" value="60" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="windSpeed">Wind Speed (km/h)</label>
+                            <input type="number" id="windSpeed" value="5" min="0" max="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>👥 User Profile</h3>
+                    <div class="form-group">
+                        <label>Select Your Profile</label>
+                        <div class="persona-selector">
+                            <div class="persona-option" data-persona="children_elderly">
+                                <div class="icon">👶👴</div>
+                                <div>Children / Elderly</div>
+                            </div>
+                            <div class="persona-option" data-persona="outdoor_workers">
+                                <div class="icon">👷🏃</div>
+                                <div>Outdoor Workers / Athletes</div>
+                            </div>
+                            <div class="persona-option selected" data-persona="general_public">
+                                <div class="icon">👥</div>
+                                <div>General Public</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exposureDuration">Exposure Duration (hours)</label>
+                        <input type="number" id="exposureDuration" value="2" min="0" max="24">
+                    </div>
+                    <button class="predict-btn" onclick="predictHealthRisk()">
+                        🚀 Predict Health Risk
+                    </button>
+                </div>
+            </section>
+
+            <section class="results-section" id="resultsSection">
+                <div id="loadingDiv" class="loading" style="display: none;">
+                    <div>🔄 Analyzing health risk factors...</div>
+                </div>
+                <div id="errorDiv" class="error" style="display: none;"></div>
+                <div id="resultsDiv"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let selectedPersona = 'general_public';
+
+        // Persona selection
+        document.querySelectorAll('.persona-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.persona-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPersona = this.dataset.persona;
+            });
+        });
+
+        async function predictHealthRisk() {
+            const resultsSection = document.getElementById('resultsSection');
+            const loadingDiv = document.getElementById('loadingDiv');
+            const errorDiv = document.getElementById('errorDiv');
+            const resultsDiv = document.getElementById('resultsDiv');
+            const predictBtn = document.querySelector('.predict-btn');
+
+            // Show loading
+            resultsSection.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            predictBtn.disabled = true;
+
+            // Collect form data
+            const formData = {
+                aqi: parseFloat(document.getElementById('aqi').value),
+                pm25: parseFloat(document.getElementById('pm25').value),
+                pm10: parseFloat(document.getElementById('pm10').value),
+                temperature: parseFloat(document.getElementById('temperature').value),
+                humidity: parseFloat(document.getElementById('humidity').value),
+                wind_speed: parseFloat(document.getElementById('windSpeed').value),
+                pressure: 1013, // Default value
+                visibility: 8, // Default value
+                persona: selectedPersona,
+                exposure_duration: parseFloat(document.getElementById('exposureDuration').value)
+            };
+
+            try {
+                // Make API call
+                const response = await fetch('http://localhost:5005/health-risk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.health_risk);
+                } else {
+                    throw new Error(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                errorDiv.textContent = `❌ Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+                predictBtn.disabled = false;
+            }
+        }
+
+        function displayResults(healthRisk) {
+            const resultsDiv = document.getElementById('resultsDiv');
+            
+            const riskClass = healthRisk.category.toLowerCase();
+            
+            resultsDiv.innerHTML = `
+                <div class="risk-card ${riskClass}">
+                    <div class="risk-header">
+                        <div class="risk-level ${riskClass}">
+                            ${healthRisk.category.toUpperCase()}
+                        </div>
+                        <div class="confidence">
+                            Confidence: ${(healthRisk.confidence * 100).toFixed(1)}%
+                        </div>
+                    </div>
+                    
+                    <div class="health-advice">
+                        <h4>💡 Health Advice</h4>
+                        <p>${healthRisk.health_advice}</p>
+                    </div>
+                    
+                    <div class="risk-factors">
+                        <h4>📊 Risk Analysis</h4>
+                        <div class="factor-item">
+                            <span class="factor-name">Profile</span>
+                            <span class="factor-value">${healthRisk.persona.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                        </div>
+                        <div class="factor-item">
+                            <span class="factor-name">Exposure Duration</span>
+                            <span class="factor-value">${healthRisk.exposure_duration} hours</span>
+                        </div>
+                        <div class="factor-item">
+                            <span class="factor-name">PM2.5 Level</span>
+                            <span class="factor-value">${healthRisk.forecast_data.pm25} µg/m³</span>
+                        </div>
+                        <div class="factor-item">
+                            <span class="factor-name">AQI</span>
+                            <span class="factor-value">${healthRisk.forecast_data.aqi}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <h4>🔍 Explanation</h4>
+                        <p>${healthRisk.explanation}</p>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        // Auto-predict on Enter key
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    predictHealthRisk();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

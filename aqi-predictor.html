@@ -223,6 +223,68 @@
         </div>
     </section>
 
+    <!-- Health Risk Analysis Section -->
+    <section id="healthRisk" class="health-risk">
+        <div class="container">
+            <h2>🏥 Health Risk Analysis</h2>
+            <div class="risk-personas">
+                <div class="persona-card children">
+                    <div class="persona-icon">👶👴</div>
+                    <h3>Children / Elderly</h3>
+                    <div class="risk-level" id="childrenRisk">Hazardous</div>
+                    <div class="risk-advice" id="childrenAdvice">Remain indoors</div>
+                </div>
+                <div class="persona-card workers">
+                    <div class="persona-icon">👷🏃</div>
+                    <h3>Outdoor Workers</h3>
+                    <div class="risk-level" id="workersRisk">High</div>
+                    <div class="risk-advice" id="workersAdvice">Avoid prolonged work</div>
+                </div>
+                <div class="persona-card general">
+                    <div class="persona-icon">👥</div>
+                    <h3>General Public</h3>
+                    <div class="risk-level" id="generalRisk">Moderate</div>
+                    <div class="risk-advice" id="generalAdvice">Limit outdoor activity</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forecast Health Risk Indicator Section -->
+    <section id="forecastRiskIndicator" class="forecast-risk-indicator">
+        <div class="container">
+            <h2>🔮 Forecast Health Risk Indicator</h2>
+            <div class="risk-summary">
+                <div class="risk-summary-header">
+                    <div class="risk-timeline">
+                        <h3>Next 6 Hours Risk Assessment</h3>
+                        <div class="risk-overview" id="riskOverview">
+                            <div class="risk-item">
+                                <span class="risk-label">Overall Risk:</span>
+                                <span class="risk-value" id="overallRisk">Loading...</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-label">WHO Exceedance:</span>
+                                <span class="risk-value" id="whoExceedance">Loading...</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-label">Most Affected:</span>
+                                <span class="risk-value" id="mostAffected">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hourly-risks">
+                    <h3>Hour-by-Hour Risk Breakdown</h3>
+                    <div class="hourly-grid" id="hourlyRisks">
+                        <!-- Hourly risk items will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Health Tips Section -->
     <section id="health" class="health-tips">
         <div class="container">
@@ -311,6 +373,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="aqi-script-fixed.js"></script>
+    <script src="aqi-script-fixed-v2.js"></script>
 </body>
 </html>
