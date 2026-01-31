@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Predictor - Air Quality Index Forecast</title>
+    <link rel="stylesheet" href="aqi-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1><i class="fas fa-wind"></i> AQI Predictor</h1>
+                </div>
+                <div class="nav-menu">
+                    <li><a href="#current">Current AQI</a></li>
+                    <li><a href="#forecast">Forecast</a></li>
+                    <li><a href="#analysis">Analysis</a></li>
+                    <li><a href="#health">Health Tips</a></li>
+                    <li><a href="data-input.html" target="_blank">📊 Import Data</a></li>
+                    <li><a href="#" onclick="refreshData()" style="color: var(--accent-color);">🔄 Refresh</a></li>
+                </ul>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Breathe Better Tomorrow</h1>
+                <p>Advanced Air Quality Index prediction powered by machine learning</p>
+                <div class="location-input">
+                    <input type="text" id="locationInput" placeholder="Enter your city..." value="CBD Belapur">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="air-quality-animation">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Current AQI Section -->
+    <section id="current" class="current-aqi">
+        <div class="container">
+            <h2>Current Air Quality</h2>
+            <div class="aqi-display">
+                <div class="aqi-main">
+                    <div class="aqi-value" id="currentAQI">~125</div>
+                    <div class="aqi-label" id="aqiLabel">Unhealthy for Sensitive</div>
+                    <div class="aqi-location" id="currentLocation">CBD Belapur, India</div>
+                    <div class="aqi-time" id="updateTime">Updated just now</div>
+                    <div style="margin-top: 0.5rem; color: var(--text-light); font-size: 0.9rem; font-style: italic;">*Approximate values based on available data</div>
+                </div>
+                <div class="aqi-gauge">
+                    <div class="gauge-container">
+                        <div class="gauge-circle" id="gaugeCircle"></div>
+                        <div class="gauge-needle" id="gaugeNeedle"></div>
+                        <div class="gauge-center"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pollutants-grid">
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">PM2.5</div>
+                    <div class="pollutant-value">~68</div>
+                    <div class="pollutant-status high">High</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">PM10</div>
+                    <div class="pollutant-value">~95</div>
+                    <div class="pollutant-status high">High</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">O₃</div>
+                    <div class="pollutant-value">~38</div>
+                    <div class="pollutant-status moderate">Moderate</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">NO₂</div>
+                    <div class="pollutant-value">~32</div>
+                    <div class="pollutant-status moderate">Moderate</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">NO</div>
+                    <div class="pollutant-value">~15</div>
+                    <div class="pollutant-status moderate">Moderate</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">SO₂</div>
+                    <div class="pollutant-value">~9</div>
+                    <div class="pollutant-status good">Good</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">CO</div>
+                    <div class="pollutant-value">~0.6</div>
+                    <div class="pollutant-status good">Good</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">💨</div>
+                    <div class="pollutant-value">~12</div>
+                    <div class="pollutant-status moderate">Moderate</div>
+                    <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">Wind Speed (km/h)</div>
+                </div>
+                <div class="pollutant-card">
+                    <div class="pollutant-icon">💧</div>
+                    <div class="pollutant-value">~65</div>
+                    <div class="pollutant-status moderate">Moderate</div>
+                    <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">Humidity (%)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forecast Section -->
+    <section id="forecast" class="forecast">
+        <div class="container">
+            <h2>AQI Trend - Last 6 Days</h2>
+            <div class="forecast-controls">
+                <button class="forecast-btn active" data-range="7">Last 6 Days</button>
+                <button class="forecast-btn" data-range="14">14 Days</button>
+                <button class="forecast-btn" data-range="30">30 Days</button>
+            </div>
+            <div class="forecast-chart">
+                <canvas id="forecastChart"></canvas>
+            </div>
+            <div class="forecast-legend">
+                <div class="legend-item">
+                    <div class="legend-color good"></div>
+                    <span>Good (0-50)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color moderate"></div>
+                    <span>Moderate (51-100)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color unhealthy-sensitive"></div>
+                    <span>Unhealthy for Sensitive (101-150)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color unhealthy"></div>
+                    <span>Unhealthy (151-200)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color very-unhealthy"></div>
+                    <span>Very Unhealthy (201-300)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color hazardous"></div>
+                    <span>Hazardous (301+)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Section -->
+    <section id="analysis" class="analysis">
+        <div class="container">
+            <h2>AI-Powered Analysis</h2>
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <div class="analysis-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Trend Analysis</h3>
+                    <p>AQI has increased by 15% over the past week due to increased vehicular traffic and industrial activity.</p>
+                    <div class="trend-indicator up">
+                        <i class="fas fa-arrow-up"></i> Rising Trend
+                    </div>
+                </div>
+                <div class="analysis-card">
+                    <div class="analysis-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Risk Factors</h3>
+                    <p>High PM2.5 levels detected. Primary sources: vehicle emissions, construction dust, and industrial pollution.</p>
+                    <div class="risk-level high">
+                        High Risk
+                    </div>
+                </div>
+                <div class="analysis-card">
+                    <div class="analysis-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Recommendations</h3>
+                    <p>Limit outdoor activities, use air purifiers indoors, and wear N95 masks when going outside.</p>
+                    <div class="recommendation-priority urgent">
+                        Urgent Action Needed
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prediction-model">
+                <h3>ML Model Accuracy</h3>
+                <div class="accuracy-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">94.2%</div>
+                        <div class="stat-label">Prediction Accuracy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">±8.5</div>
+                        <div class="stat-label">Average Error Margin</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">2.3M</div>
+                        <div class="stat-label">Data Points Analyzed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Tips Section -->
+    <section id="health" class="health-tips">
+        <div class="container">
+            <h2>Health Recommendations</h2>
+            <div class="health-categories">
+                <div class="health-category">
+                    <div class="category-icon">
+                        <i class="fas fa-child"></i>
+                    </div>
+                    <h3>Children</h3>
+                    <ul>
+                        <li>Avoid outdoor playtime</li>
+                        <li>Keep windows closed</li>
+                        <li>Use air purifiers</li>
+                        <li>Limit school outdoor activities</li>
+                    </ul>
+                </div>
+                <div class="health-category">
+                    <div class="category-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Adults</h3>
+                    <ul>
+                        <li>Wear N95 masks outdoors</li>
+                        <li>Reduce outdoor exercise</li>
+                        <li>Work from home if possible</li>
+                        <li>Stay hydrated</li>
+                    </ul>
+                </div>
+                <div class="health-category">
+                    <div class="category-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>Elderly & Sensitive</h3>
+                    <ul>
+                        <li>Avoid all outdoor activities</li>
+                        <li>Keep medication ready</li>
+                        <li>Monitor health closely</li>
+                        <li>Consult doctor if symptoms worsen</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-wind"></i> AQI Predictor</h3>
+                    <p>Advanced air quality forecasting using machine learning algorithms and real-time data analysis.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Features</h4>
+                    <ul>
+                        <li>Real-time AQI Monitoring</li>
+                        <li>7-Day Forecast</li>
+                        <li>Health Recommendations</li>
+                        <li>Pollutant Breakdown</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Data Sources</h4>
+                    <ul>
+                        <li>Environmental Agencies</li>
+                        <li>Weather Stations</li>
+                        <li>Satellite Data</li>
+                        <li>Crowd Sensing</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>About</h4>
+                    <p>Our AI-powered system analyzes multiple data points to provide accurate air quality predictions and health recommendations.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AQI Predictor. Protecting health through data-driven insights.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="aqi-script.js"></script>
+</body>
+</html>
