@@ -4,6 +4,7 @@ class AQIPredictor {
         this.currentAQI = 0;
         this.currentLocation = '';
         this.cityChangeTimeout = null;
+        this.updateInterval = null;
         this.forecastChart = null;
         this.init();
     }
@@ -12,6 +13,7 @@ class AQIPredictor {
         this.setupEventListeners();
         this.initForecastChart();
         this.updateAQIDisplay();
+        this.startRealTimeUpdates();
     }
 
     setupEventListeners() {
@@ -43,6 +45,157 @@ class AQIPredictor {
         });
     }
 
+    startRealTimeUpdates() {
+        console.log('🔄 Starting real-time AQI updates...');
+        
+        // Clear any existing interval
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+        }
+        
+        // Set up automatic updates every 5 minutes
+        this.updateInterval = setInterval(() => {
+            if (this.currentLocation) {
+                console.log(`⏰ Auto-updating AQI for ${this.currentLocation}...`);
+                this.simulateAQIFetch(this.currentLocation);
+                this.updateForecastWithRealData(); // Update forecast too
+                this.updateTimestamp();
+            }
+        }, 5 * 60 * 1000); // 5 minutes
+        
+        console.log('✅ Real-time updates started (every 5 minutes)');
+    }
+    
+    async updateForecastWithRealData() {
+        try {
+            const response = await fetch(`http://localhost:5005/forecast-aqi/${this.currentLocation}?hours=6`);
+            const data = await response.json();
+            
+            if (data.success && data.data && data.data.forecast) {
+                const forecastData = data.data.forecast;
+                console.log('🔮 Real forecast data received:', forecastData);
+                
+                // Update forecast chart with real data
+                this.updateForecastChartWithRealData(forecastData);
+                
+                // Update health risk indicators
+                this.updateHealthRiskIndicators(forecastData);
+                
+                console.log('✅ Forecast updated with real API data');
+            }
+        } catch (error) {
+            console.log('❌ Forecast API failed, using synthetic data:', error);
+            // Fallback to synthetic data
+            const activeBtn = document.querySelector('.forecast-btn.active');
+            const hours = activeBtn ? parseInt(activeBtn.dataset.range) : 6;
+            this.updateForecastRange(hours);
+        }
+    }
+    
+    updateForecastChartWithRealData(forecastData) {
+        if (!this.forecastChart) return;
+        
+        const labels = forecastData.map(item => {
+            const time = new Date(item.timestamp);
+            return time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        });
+        
+        const values = forecastData.map(item => item.aqi);
+        
+        this.forecastChart.data.labels = labels;
+        this.forecastChart.data.datasets[0].data = values;
+        this.forecastChart.update();
+        
+        console.log('📈 Forecast chart updated with real data:', { labels, values });
+    }
+    
+    updateHealthRiskIndicators(forecastData) {
+        // Calculate risk levels from forecast data
+        const aqiValues = forecastData.map(item => item.aqi);
+        const maxAQI = Math.max(...aqiValues);
+        const avgAQI = aqiValues.reduce((a, b) => a + b, 0) / aqiValues.length;
+        
+        // Update overall risk
+        const overallRiskElement = document.getElementById('overallRisk');
+        if (overallRiskElement) {
+            let riskLevel = 'Low';
+            if (maxAQI > 200) riskLevel = 'Very High';
+            else if (maxAQI > 150) riskLevel = 'High';
+            else if (maxAQI > 100) riskLevel = 'Moderate';
+            
+            overallRiskElement.textContent = riskLevel;
+            overallRiskElement.className = `risk-value ${riskLevel.toLowerCase().replace(' ', '-')}`;
+        }
+        
+        // Update WHO exceedance
+        const whoExceedanceElement = document.getElementById('whoExceedance');
+        if (whoExceedanceElement) {
+            const exceedanceCount = aqiValues.filter(aqi => aqi > 50).length;
+            whoExceedanceElement.textContent = `${exceedanceCount}/6 hours`;
+        }
+        
+        // Update most affected
+        const mostAffectedElement = document.getElementById('mostAffected');
+        if (mostAffectedElement) {
+            const worstHour = forecastData.reduce((worst, current) => 
+                current.aqi > worst.aqi ? current : worst
+            );
+            const worstTime = new Date(worstHour.timestamp).toLocaleTimeString('en-US', { 
+                hour: '2-digit', minute: '2-digit' 
+            });
+            mostAffectedElement.textContent = `Hour ${worstHour.hour} (${worstTime})`;
+        }
+        
+        // Update hourly risk breakdown
+        this.updateHourlyRiskBreakdown(forecastData);
+    }
+    
+    updateHourlyRiskBreakdown(forecastData) {
+        const hourlyRisksElement = document.getElementById('hourlyRisks');
+        if (!hourlyRisksElement) return;
+        
+        let html = '';
+        forecastData.forEach(item => {
+            const time = new Date(item.timestamp).toLocaleTimeString('en-US', { 
+                hour: '2-digit', minute: '2-digit' 
+            });
+            
+            let riskClass = 'low';
+            let riskLabel = 'Low';
+            if (item.aqi > 200) { riskClass = 'very-high'; riskLabel = 'Very High'; }
+            else if (item.aqi > 150) { riskClass = 'high'; riskLabel = 'High'; }
+            else if (item.aqi > 100) { riskClass = 'moderate'; riskLabel = 'Moderate'; }
+            else if (item.aqi > 50) { riskClass = 'elevated'; riskLabel = 'Elevated'; }
+            
+            html += `
+                <div class="hourly-risk-item ${riskClass}">
+                    <div class="hourly-time">${time}</div>
+                    <div class="hourly-aqi">AQI: ${item.aqi}</div>
+                    <div class="hourly-risk">${riskLabel}</div>
+                    <div class="hourly-confidence">Confidence: ${item.confidence}%</div>
+                </div>
+            `;
+        });
+        
+        hourlyRisksElement.innerHTML = html;
+    }
+    
+    stopRealTimeUpdates() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+            console.log('⏹️ Real-time updates stopped');
+        }
+    }
+    
+    updateTimestamp() {
+        const updateTimeElement = document.getElementById('updateTime');
+        if (updateTimeElement) {
+            const now = new Date();
+            updateTimeElement.textContent = `Updated: ${now.toLocaleTimeString()}`;
+        }
+    }
+    
     handleCityChange(newLocation) {
         if (this.cityChangeTimeout) {
             clearTimeout(this.cityChangeTimeout);
@@ -430,31 +583,44 @@ class AQIPredictor {
     }
 
     updateAQIDisplay() {
+        console.log('🔄 Updating AQI display...');
+        console.log('Current AQI:', this.currentAQI);
+        console.log('Current Location:', this.currentLocation);
+        
         if (this.currentAQI === 0 || this.currentLocation === '') {
-            document.getElementById('currentAQI').textContent = '0';
+            console.log('❌ No data to display');
+            document.getElementById('currentAQI').textContent = '--';
+            document.getElementById('aqiLabel').textContent = 'Loading...';
             document.getElementById('currentLocation').textContent = '';
             document.getElementById('updateTime').textContent = '';
-            document.getElementById('aqiLabel').textContent = '';
             this.updateGauge(0);
             this.updatePollutants(0);
             return;
         }
         
-        document.getElementById('currentAQI').textContent = '~' + this.currentAQI;
-        document.getElementById('currentLocation').textContent = this.currentLocation + ', India';
-        document.getElementById('updateTime').textContent = 'Updated just now';
+        document.getElementById('currentAQI').textContent = this.currentAQI;
         
         const aqiInfo = this.getAQIInfo(this.currentAQI);
         document.getElementById('aqiLabel').textContent = aqiInfo.label;
+        document.getElementById('currentLocation').textContent = this.currentLocation + ', India';
+        this.updateTimestamp(); // Update timestamp with real-time info
+        
+        console.log('✅ AQI display updated:', {
+            value: this.currentAQI,
+            level: aqiInfo.label,
+            location: this.currentLocation
+        });
         
         const aqiValueElement = document.querySelector('.aqi-value');
-        aqiValueElement.style.background = aqiInfo.color;
-        aqiValueElement.style.webkitBackgroundClip = 'text';
-        aqiValueElement.style.webkitTextFillColor = 'transparent';
+        if (aqiValueElement) {
+            aqiValueElement.style.background = aqiInfo.color;
+            aqiValueElement.style.webkitBackgroundClip = 'text';
+            aqiValueElement.style.webkitTextFillColor = 'transparent';
+        }
         
         this.updateGauge(this.currentAQI);
-        
         this.updateAnalysis(this.currentAQI);
+        this.updatePollutantsWithRealData({ aqi: this.currentAQI });
     }
 
     updateGauge(aqi) {

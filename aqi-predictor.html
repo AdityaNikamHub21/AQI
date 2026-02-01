@@ -60,10 +60,12 @@
             <h2>Current Air Quality</h2>
             <div class="aqi-display">
                 <div class="aqi-main">
-                    <div class="aqi-value" id="currentAQI"></div>
-                    <div class="aqi-label" id="aqiLabel"></div>
-                    <div class="aqi-location" id="currentLocation"></div>
-                    <div class="aqi-time" id="updateTime"></div>
+                    <div class="aqi-value" id="currentAQI">--</div>
+                    <div class="aqi-details">
+                        <div class="aqi-label" id="aqiLabel">Loading...</div>
+                        <div class="location-name" id="currentLocation"></div>
+                        <div class="update-time" id="updateTime">Starting real-time updates...</div>
+                    </div>
                 </div>
                 <div class="aqi-gauge">
                     <div class="gauge-container">
@@ -226,52 +228,50 @@
     <!-- Spatial AQI Heat Map Section -->
     <section id="spatialMap" class="spatial-map">
         <div class="container">
-            <h2>🗺️ Spatial AQI Heat Map</h2>
-            <p class="section-intro">City-level air quality visualization with precise location data and area-wise AQI variations</p>
+            <h2>🗺️ AeroGuard Spatial AQI Heatmap</h2>
+            <p class="section-intro">Real-time air quality visualization across Navi Mumbai with precise location data and AQI variations</p>
             
-            <div class="map-controls">
-                <div class="city-selector">
-                    <label for="cityMapSelect">Select City for Heat Map:</label>
-                    <select id="cityMapSelect" class="city-map-select">
-                        <option value="">Choose a city...</option>
-                        <option value="cbd belapur">CBD Belapur</option>
-                        <option value="vashi">Vashi</option>
-                        <option value="sanpada">Sanpada</option>
-                        <option value="mumbai">Mumbai</option>
-                    </select>
-                </div>
-                
-                <div class="map-actions">
-                    <button id="generateMapBtn" class="generate-map-btn">
-                        <i class="fas fa-map-marked-alt"></i> Generate Heat Map
-                    </button>
-                    <button id="refreshMapBtn" class="refresh-map-btn" style="display: none;">
-                        <i class="fas fa-sync-alt"></i> Refresh Data
-                    </button>
-                </div>
+            <div class="map-actions">
+                <button id="generateMapBtn" class="generate-map-btn" onclick="refreshHeatmap()">
+                    <i class="fas fa-sync-alt"></i> Refresh Heatmap
+                </button>
+                <button id="refreshMapBtn" class="refresh-map-btn" onclick="window.location.reload()">
+                    <i class="fas fa-redo"></i> Reload Page
+                </button>
             </div>
             
-            <div class="map-container" id="mapContainer" style="display: none;">
+            <div class="map-container" id="mapContainer">
                 <div class="map-header">
-                    <h3 id="mapTitle">City AQI Heat Map</h3>
+                    <h3 id="mapTitle">🌍 AeroGuard Spatial AQI Heatmap</h3>
                     <div class="map-stats">
                         <div class="stat-item">
                             <span class="stat-label">Areas Monitored:</span>
-                            <span class="stat-value" id="areasCount">0</span>
+                            <span class="stat-value" id="areasCount">3</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Average AQI:</span>
-                            <span class="stat-value" id="avgAQI">0</span>
+                            <span class="stat-value" id="avgAQI">105</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">AQI Range:</span>
-                            <span class="stat-value" id="aqiRange">0-0</span>
+                            <span class="stat-value" id="aqiRange">78-138</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="map-visualization">
-                    <div id="foliumMap" class="folium-map"></div>
+                    <iframe id="foliumMap" 
+                            src="templates/heatmap.html" 
+                            style="width: 100%; height: 600px; border: none; border-radius: 12px;"
+                            frameborder="0"
+                            onload="hideLoading()">
+                    </iframe>
+                    <div id="mapLoading" style="width: 100%; height: 600px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 12px;">
+                        <div style="text-align: center;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #007bff; margin-bottom: 1rem;"></i>
+                            <p style="color: #666; margin: 0;">Loading AeroGuard Heatmap...</p>
+                        </div>
+                    </div>
                     <div id="testMap" style="width: 100%; height: 500px; border-radius: 12px; display: none;"></div>
                 </div>
                 
@@ -308,47 +308,64 @@
                 <div class="area-details">
                     <h4>📍 Area-wise AQI Details</h4>
                     <div class="area-grid" id="areaGrid">
-                        <!-- Area cards will be inserted here -->
-                    </div>
-                </div>
-                
-                <div class="spatial-insights">
-                    <h4>🔍 Spatial Analysis Insights</h4>
-                    <div class="insights-grid">
-                        <div class="insight-card">
-                            <div class="insight-icon">
-                                <i class="fas fa-arrow-up"></i>
+                        <div class="area-card">
+                            <div class="area-header">
+                                <h5>CBD Belapur</h5>
+                                <span class="aqi-badge unhealthy-sensitive">104</span>
                             </div>
-                            <div class="insight-content">
-                                <h5>Highest Pollution Area</h5>
-                                <p id="highestArea">-</p>
-                            </div>
-                        </div>
-                        <div class="insight-card">
-                            <div class="insight-icon">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-                            <div class="insight-content">
-                                <h5>Lowest Pollution Area</h5>
-                                <p id="lowestArea">-</p>
+                            <div class="area-pollutants">
+                                <div class="pollutant-item">
+                                    <span>PM2.5:</span>
+                                    <span>87.1</span>
+                                </div>
+                                <div class="pollutant-item">
+                                    <span>PM10:</span>
+                                    <span>52.0</span>
+                                </div>
+                                <div class="pollutant-item">
+                                    <span>Wind:</span>
+                                    <span>12.3 m/s</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="insight-card">
-                            <div class="insight-icon">
-                                <i class="fas fa-chart-line"></i>
+                        <div class="area-card">
+                            <div class="area-header">
+                                <h5>Vashi</h5>
+                                <span class="aqi-badge unhealthy">138</span>
                             </div>
-                            <div class="insight-content">
-                                <h5>AQI Variation</h5>
-                                <p id="aqiVariation">-</p>
+                            <div class="area-pollutants">
+                                <div class="pollutant-item">
+                                    <span>PM2.5:</span>
+                                    <span>72.0</span>
+                                </div>
+                                <div class="pollutant-item">
+                                    <span>PM10:</span>
+                                    <span>98.0</span>
+                                </div>
+                                <div class="pollutant-item">
+                                    <span>Wind:</span>
+                                    <span>14.0 m/s</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="insight-card">
-                            <div class="insight-icon">
-                                <i class="fas fa-percentage"></i>
+                        <div class="area-card">
+                            <div class="area-header">
+                                <h5>Sanpada</h5>
+                                <span class="aqi-badge moderate">78</span>
                             </div>
-                            <div class="insight-content">
-                                <h5>Uniformity Index</h5>
-                                <p id="uniformityIndex">-</p>
+                            <div class="area-pollutants">
+                                <div class="pollutant-item">
+                                    <span>PM2.5:</span>
+                                    <span>78.9</span>
+                                </div>
+                                <div class="pollutant-item">
+                                    <span>PM10:</span>
+                                    <span>45.6</span>
+                                </div>
+                                <div class="pollutant-item">
+                                    <span>Wind:</span>
+                                    <span>8.7 m/s</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -707,6 +724,76 @@
                 } catch (e) {
                     console.log('❌ Test map failed:', e);
                 }
+            }
+        });
+    </script>
+    <script>
+        // Heatmap loading and refresh functions
+        function hideLoading() {
+            const loading = document.getElementById('mapLoading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+            console.log('✅ AeroGuard Heatmap loaded successfully');
+        }
+        
+        function refreshHeatmap() {
+            console.log('🔄 Refreshing AeroGuard Heatmap...');
+            
+            // Show loading state
+            const loading = document.getElementById('mapLoading');
+            const iframe = document.getElementById('foliumMap');
+            
+            if (loading) {
+                loading.style.display = 'flex';
+            }
+            
+            // Refresh iframe by changing source
+            if (iframe) {
+                const currentSrc = iframe.src;
+                iframe.src = '';
+                setTimeout(() => {
+                    iframe.src = currentSrc + '?t=' + new Date().getTime();
+                }, 100);
+            }
+            
+            // Update button text
+            const btn = document.getElementById('generateMapBtn');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Heatmap';
+                }, 2000);
+            }
+        }
+        
+        // Auto-hide loading after 10 seconds (fallback)
+        setTimeout(() => {
+            hideLoading();
+        }, 10000);
+        
+        // Check if heatmap loads properly
+        window.addEventListener('load', function() {
+            console.log('🌍 AeroGuard Spatial Map Section Ready');
+            
+            // Check iframe loading
+            const iframe = document.getElementById('foliumMap');
+            if (iframe) {
+                iframe.addEventListener('error', function() {
+                    console.log('❌ Heatmap failed to load');
+                    const loading = document.getElementById('mapLoading');
+                    if (loading) {
+                        loading.innerHTML = `
+                            <div style="text-align: center;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                                <p style="color: #dc3545; margin: 0;">Heatmap failed to load</p>
+                                <button onclick="refreshHeatmap()" style="margin-top: 1rem; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Retry
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
             }
         });
     </script>

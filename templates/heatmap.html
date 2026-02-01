@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_02451fe18bb20c2dee525f421ecd9c27 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+</head>
+<body>
+    
+    
+        <div style="position: fixed; 
+                    top: 10px; left: 50%; transform: translateX(-50%); 
+                    z-index: 1000; background-color: white; padding: 10px; 
+                    border-radius: 5px; border: 2px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <h3 style="margin: 0; text-align: center;">🌍 AeroGuard AQI Heatmap</h3>
+            <p style="margin: 5px 0; text-align: center; font-size: 12px;">Navi Mumbai - Real-time AQI Forecast</p>
+        </div>
+        
+    
+        <div style="position: fixed; 
+                    bottom: 50px; left: 10px; 
+                    z-index: 1000; background-color: white; padding: 10px; 
+                    border-radius: 5px; border: 2px solid #ccc; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <h4 style="margin: 0 0 10px 0;">AQI Legend</h4>
+            <div style="display: flex; align-items: center; margin: 5px 0;">
+                <div style="width: 20px; height: 20px; background: #00e400; margin-right: 8px;"></div>
+                <span>Good (0-50)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 5px 0;">
+                <div style="width: 20px; height: 20px; background: #ffff00; margin-right: 8px;"></div>
+                <span>Moderate (51-100)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 5px 0;">
+                <div style="width: 20px; height: 20px; background: #ff7e00; margin-right: 8px;"></div>
+                <span>Unhealthy for Sensitive (101-150)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 5px 0;">
+                <div style="width: 20px; height: 20px; background: #ff0000; margin-right: 8px;"></div>
+                <span>Unhealthy (151-200)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 5px 0;">
+                <div style="width: 20px; height: 20px; background: #8f3f97; margin-right: 8px;"></div>
+                <span>Very Unhealthy (201-300)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 5px 0;">
+                <div style="width: 20px; height: 20px; background: #7e0023; margin-right: 8px;"></div>
+                <span>Hazardous (301+)</span>
+            </div>
+        </div>
+        
+    
+            <div class="folium-map" id="map_02451fe18bb20c2dee525f421ecd9c27" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_02451fe18bb20c2dee525f421ecd9c27 = L.map(
+                "map_02451fe18bb20c2dee525f421ecd9c27",
+                {
+                    center: [19.076, 73.02],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 11,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_39163efc439382b44eb12a5fadfd4752 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_39163efc439382b44eb12a5fadfd4752.addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var heat_map_0aaa03898ac7fc5ccf3f0720162c0528 = L.heatLayer(
+                [[19.0158, 73.1188, 0.3233333333333333], [19.0078, 73.1108, 0.25866666666666666], [19.011799999999997, 73.11479999999999, 0.25866666666666666], [19.0158, 73.1188, 0.25866666666666666], [19.0198, 73.1228, 0.25866666666666666], [19.023799999999998, 73.12679999999999, 0.25866666666666666], [19.076, 72.8777, 0.4533333333333333], [19.068, 72.86970000000001, 0.3626666666666667], [19.072, 72.8737, 0.3626666666666667], [19.076, 72.8777, 0.3626666666666667], [19.080000000000002, 72.88170000000001, 0.3626666666666667], [19.084, 72.8857, 0.3626666666666667], [19.0477, 73.0766, 0.2866666666666667], [19.0397, 73.0686, 0.22933333333333336], [19.043699999999998, 73.0726, 0.22933333333333336], [19.0477, 73.0766, 0.22933333333333336], [19.0517, 73.0806, 0.22933333333333336], [19.055699999999998, 73.0846, 0.22933333333333336], [19.03, 73.02, 0.3333333333333333], [19.022000000000002, 73.012, 0.26666666666666666], [19.026, 73.01599999999999, 0.26666666666666666], [19.03, 73.02, 0.26666666666666666], [19.034000000000002, 73.024, 0.26666666666666666], [19.038, 73.02799999999999, 0.26666666666666666], [19.0728, 73.0926, 0.38], [19.0648, 73.08460000000001, 0.30400000000000005], [19.0688, 73.0886, 0.30400000000000005], [19.0728, 73.0926, 0.30400000000000005], [19.076800000000002, 73.09660000000001, 0.30400000000000005], [19.0808, 73.1006, 0.30400000000000005], [18.9867, 73.0996, 0.4533333333333333], [18.9787, 73.0916, 0.3626666666666667], [18.982699999999998, 73.09559999999999, 0.3626666666666667], [18.9867, 73.0996, 0.3626666666666667], [18.9907, 73.1036, 0.3626666666666667], [18.994699999999998, 73.10759999999999, 0.3626666666666667]],
+                {
+  "minOpacity": 0.5,
+  "maxZoom": 17,
+  "radius": 25,
+  "blur": 15,
+  "gradient": {
+  0.0: "#00e400",
+  0.3: "#ffff00",
+  0.5: "#ff7e00",
+  0.7: "#ff0000",
+  0.9: "#8f3f97",
+  1.0: "#7e0023",
+},
+}
+            );
+        
+    
+            heat_map_0aaa03898ac7fc5ccf3f0720162c0528.addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var marker_19464842e4a7bf92a11363fb5ca7eca6 = L.marker(
+                [19.0158, 73.1188],
+                {
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var icon_4ddd5ce9238f3cfb02b3e9aa6729293b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_e262d91a63e8f703b72092059ffd019e = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_5871ea9a302e63e6f7e889ec6c5b1aca = $(`<div id="html_5871ea9a302e63e6f7e889ec6c5b1aca" style="width: 100.0%; height: 100.0%;">                 <div style="font-family: Arial, sans-serif;">                     <h4 style="margin: 0; color: #ffff00;">CBD Belapur</h4>                     <p style="margin: 5px 0;"><strong>AQI:</strong> 97</p>                     <p style="margin: 5px 0;"><strong>Level:</strong> Moderate</p>                     <p style="margin: 5px 0;"><strong>Wind Speed:</strong> 12.850052212967618 m/s</p>                     <p style="margin: 5px 0; font-size: 11px; color: #666;">                         Updated: 2026-02-01 10:42                     </p>                 </div>                 </div>`)[0];
+                popup_e262d91a63e8f703b72092059ffd019e.setContent(html_5871ea9a302e63e6f7e889ec6c5b1aca);
+            
+        
+
+        marker_19464842e4a7bf92a11363fb5ca7eca6.bindPopup(popup_e262d91a63e8f703b72092059ffd019e)
+        ;
+
+        
+    
+    
+            marker_19464842e4a7bf92a11363fb5ca7eca6.bindTooltip(
+                `<div>
+                     CBD Belapur - AQI: 97
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_19464842e4a7bf92a11363fb5ca7eca6.setIcon(icon_4ddd5ce9238f3cfb02b3e9aa6729293b);
+            
+    
+            var marker_a4b54a8c6093abb636f6fcc92c2e30df = L.marker(
+                [19.076, 72.8777],
+                {
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var icon_12b6ae6677112758fc3c2e36adda6e05 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ce7c6111def96b98563ac6094fec8649 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_7668ca1edbc61678829bbfe21cbdc94c = $(`<div id="html_7668ca1edbc61678829bbfe21cbdc94c" style="width: 100.0%; height: 100.0%;">                 <div style="font-family: Arial, sans-serif;">                     <h4 style="margin: 0; color: #ff7e00;">Vashi</h4>                     <p style="margin: 5px 0;"><strong>AQI:</strong> 136</p>                     <p style="margin: 5px 0;"><strong>Level:</strong> Unhealthy for Sensitive</p>                     <p style="margin: 5px 0;"><strong>Wind Speed:</strong> 11.162332022622735 m/s</p>                     <p style="margin: 5px 0; font-size: 11px; color: #666;">                         Updated: 2026-02-01 10:42                     </p>                 </div>                 </div>`)[0];
+                popup_ce7c6111def96b98563ac6094fec8649.setContent(html_7668ca1edbc61678829bbfe21cbdc94c);
+            
+        
+
+        marker_a4b54a8c6093abb636f6fcc92c2e30df.bindPopup(popup_ce7c6111def96b98563ac6094fec8649)
+        ;
+
+        
+    
+    
+            marker_a4b54a8c6093abb636f6fcc92c2e30df.bindTooltip(
+                `<div>
+                     Vashi - AQI: 136
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a4b54a8c6093abb636f6fcc92c2e30df.setIcon(icon_12b6ae6677112758fc3c2e36adda6e05);
+            
+    
+            var marker_6545b5fb4953c53ebaaa32ce37697f84 = L.marker(
+                [19.0477, 73.0766],
+                {
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var icon_385c9f5478a57aebe936e663b8924d8f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_95db63c81041155355313f88cd674f2f = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_2e32ae5ca8916faf62239fc335c73d3a = $(`<div id="html_2e32ae5ca8916faf62239fc335c73d3a" style="width: 100.0%; height: 100.0%;">                 <div style="font-family: Arial, sans-serif;">                     <h4 style="margin: 0; color: #ffff00;">Sanpada</h4>                     <p style="margin: 5px 0;"><strong>AQI:</strong> 86</p>                     <p style="margin: 5px 0;"><strong>Level:</strong> Moderate</p>                     <p style="margin: 5px 0;"><strong>Wind Speed:</strong> 10.395371441424402 m/s</p>                     <p style="margin: 5px 0; font-size: 11px; color: #666;">                         Updated: 2026-02-01 10:42                     </p>                 </div>                 </div>`)[0];
+                popup_95db63c81041155355313f88cd674f2f.setContent(html_2e32ae5ca8916faf62239fc335c73d3a);
+            
+        
+
+        marker_6545b5fb4953c53ebaaa32ce37697f84.bindPopup(popup_95db63c81041155355313f88cd674f2f)
+        ;
+
+        
+    
+    
+            marker_6545b5fb4953c53ebaaa32ce37697f84.bindTooltip(
+                `<div>
+                     Sanpada - AQI: 86
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_6545b5fb4953c53ebaaa32ce37697f84.setIcon(icon_385c9f5478a57aebe936e663b8924d8f);
+            
+    
+            var marker_a59f544a55179f1aaaab8113024fccb7 = L.marker(
+                [19.03, 73.02],
+                {
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var icon_cc1caaf7a2b625f69c05f22e9654ffca = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5e9534022cb2a3a32397879f9edbee93 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_9da01bea4900894cadf3f58c9ac8ed68 = $(`<div id="html_9da01bea4900894cadf3f58c9ac8ed68" style="width: 100.0%; height: 100.0%;">                 <div style="font-family: Arial, sans-serif;">                     <h4 style="margin: 0; color: #ffff00;">Nerul</h4>                     <p style="margin: 5px 0;"><strong>AQI:</strong> 100</p>                     <p style="margin: 5px 0;"><strong>Level:</strong> Moderate</p>                     <p style="margin: 5px 0;"><strong>Wind Speed:</strong> 9.309451484523235 m/s</p>                     <p style="margin: 5px 0; font-size: 11px; color: #666;">                         Updated: 2026-02-01 10:42                     </p>                 </div>                 </div>`)[0];
+                popup_5e9534022cb2a3a32397879f9edbee93.setContent(html_9da01bea4900894cadf3f58c9ac8ed68);
+            
+        
+
+        marker_a59f544a55179f1aaaab8113024fccb7.bindPopup(popup_5e9534022cb2a3a32397879f9edbee93)
+        ;
+
+        
+    
+    
+            marker_a59f544a55179f1aaaab8113024fccb7.bindTooltip(
+                `<div>
+                     Nerul - AQI: 100
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a59f544a55179f1aaaab8113024fccb7.setIcon(icon_cc1caaf7a2b625f69c05f22e9654ffca);
+            
+    
+            var marker_b302fdb7a45e7ea361638283017ccc75 = L.marker(
+                [19.0728, 73.0926],
+                {
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var icon_520e057baabd0ac88bb5cb6a5d98e3b7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_58772bcf4edbd511b43e54163f804f41 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_e0581617e7b0cbe5646a97bb8507bc44 = $(`<div id="html_e0581617e7b0cbe5646a97bb8507bc44" style="width: 100.0%; height: 100.0%;">                 <div style="font-family: Arial, sans-serif;">                     <h4 style="margin: 0; color: #ff7e00;">Kharghar</h4>                     <p style="margin: 5px 0;"><strong>AQI:</strong> 114</p>                     <p style="margin: 5px 0;"><strong>Level:</strong> Unhealthy for Sensitive</p>                     <p style="margin: 5px 0;"><strong>Wind Speed:</strong> 8.854542302355568 m/s</p>                     <p style="margin: 5px 0; font-size: 11px; color: #666;">                         Updated: 2026-02-01 10:42                     </p>                 </div>                 </div>`)[0];
+                popup_58772bcf4edbd511b43e54163f804f41.setContent(html_e0581617e7b0cbe5646a97bb8507bc44);
+            
+        
+
+        marker_b302fdb7a45e7ea361638283017ccc75.bindPopup(popup_58772bcf4edbd511b43e54163f804f41)
+        ;
+
+        
+    
+    
+            marker_b302fdb7a45e7ea361638283017ccc75.bindTooltip(
+                `<div>
+                     Kharghar - AQI: 114
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_b302fdb7a45e7ea361638283017ccc75.setIcon(icon_520e057baabd0ac88bb5cb6a5d98e3b7);
+            
+    
+            var marker_d91e7343bd5d9fc49d8844cb7655aebe = L.marker(
+                [18.9867, 73.0996],
+                {
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+        
+    
+            var icon_dd5e9905d0b3e37bbb83e637b3475d9a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "orange",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_d7f8934889ffdbc8a0d6aab6eec33a5d = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_4f36c082304b6f416b90f806a3e1150c = $(`<div id="html_4f36c082304b6f416b90f806a3e1150c" style="width: 100.0%; height: 100.0%;">                 <div style="font-family: Arial, sans-serif;">                     <h4 style="margin: 0; color: #ff7e00;">Panvel</h4>                     <p style="margin: 5px 0;"><strong>AQI:</strong> 136</p>                     <p style="margin: 5px 0;"><strong>Level:</strong> Unhealthy for Sensitive</p>                     <p style="margin: 5px 0;"><strong>Wind Speed:</strong> 8.525952633091407 m/s</p>                     <p style="margin: 5px 0; font-size: 11px; color: #666;">                         Updated: 2026-02-01 10:42                     </p>                 </div>                 </div>`)[0];
+                popup_d7f8934889ffdbc8a0d6aab6eec33a5d.setContent(html_4f36c082304b6f416b90f806a3e1150c);
+            
+        
+
+        marker_d91e7343bd5d9fc49d8844cb7655aebe.bindPopup(popup_d7f8934889ffdbc8a0d6aab6eec33a5d)
+        ;
+
+        
+    
+    
+            marker_d91e7343bd5d9fc49d8844cb7655aebe.bindTooltip(
+                `<div>
+                     Panvel - AQI: 136
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d91e7343bd5d9fc49d8844cb7655aebe.setIcon(icon_dd5e9905d0b3e37bbb83e637b3475d9a);
+            
+    
+            var layer_control_e89e3cb590289cc68e7dffef7eae4393_layers = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_39163efc439382b44eb12a5fadfd4752,
+                },
+                overlays :  {
+                    "AQI Heatmap" : heat_map_0aaa03898ac7fc5ccf3f0720162c0528,
+                },
+            };
+            let layer_control_e89e3cb590289cc68e7dffef7eae4393 = L.control.layers(
+                layer_control_e89e3cb590289cc68e7dffef7eae4393_layers.base_layers,
+                layer_control_e89e3cb590289cc68e7dffef7eae4393_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_02451fe18bb20c2dee525f421ecd9c27);
+
+        
+</script>
+</html>
